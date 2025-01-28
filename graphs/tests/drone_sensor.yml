@@ -1,0 +1,82 @@
+nodes:
+  Object0:
+    nodeClass: Macbeth Color Chart
+
+  Pose:
+    nodeClass: PoseObjects
+    links:
+      Objects:
+        - sourceNode: Object0
+          outputPort: Color Chart Object
+    values:
+      Translation (m): "[0,110,4]"
+      Rotation (deg): "[0,0,60]"
+
+  Scene0:
+    nodeClass: Desert Highway
+    links:
+      Objects:
+        - sourceNode: Pose
+          outputPort: Objects
+
+  Position_DroneLocation:
+    nodeClass: TimeEntry
+    values:
+      Time: 0.0
+      Entry: "[0,20,80]"
+
+  Waypoint_DroneLocation:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - sourceNode: Position_DroneLocation
+          outputPort: Entry
+
+  Position_LookAt:
+    nodeClass: TimeEntry
+    values:
+      Time: 0.0
+      Entry: "[0,110,8]"
+
+  Waypoint_LookAt:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - sourceNode: Position_LookAt
+          outputPort: Entry
+
+  LookAt:
+    nodeClass: LookAtOrientationEngine
+    links:
+      LocationEngine:
+        - sourceNode: Waypoint_LookAt
+          outputPort: LocationEngine
+
+  SensorPlacement:
+   nodeClass: FlexMotion
+   links:
+      LocationEngine:
+        - sourceNode: Waypoint_DroneLocation
+          outputPort: LocationEngine
+      OrientationEngine:
+        - sourceNode: LookAt
+          outputPort: OrientationEngine
+
+  Sensor0:
+    nodeClass: Drone
+    links:
+      Flex Motion:
+        - sourceNode: SensorPlacement
+          outputPort: Motion
+
+  Simulate:
+    nodeClass: DIRSIG5
+    links:
+      Sensor:
+        - sourceNode: Sensor0
+          outputPort: Sensor
+      Scene:
+        - sourceNode: Scene0
+          outputPort: Scene
+          
+version: 2

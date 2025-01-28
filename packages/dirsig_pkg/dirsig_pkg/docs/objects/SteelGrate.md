@@ -1,0 +1,1 @@
+Small steel drainage grate.

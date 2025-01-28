@@ -1,0 +1,11 @@
+<atmosphericconditions>
+  <metadata/>
+  <uniformweather>
+    <classicdata>
+      <filename>$DIRSIG_HOME/lib/data/weather/jun2392.wth</filename>
+    </classicdata>
+  </uniformweather>
+  <simpleradiativetransfer>
+    <apparentskytemperature>250</apparentskytemperature>
+  </simpleradiativetransfer>
+</atmosphericconditions>

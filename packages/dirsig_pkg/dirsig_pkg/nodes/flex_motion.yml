@@ -1,0 +1,211 @@
+
+#---------------------------------------
+# Copyright 2019-2025 DADoES, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License in the root directory in the "LICENSE" file or at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#---------------------------------------
+
+schemas:
+  TimeEntry:
+    tooltip: Specifies an entry at one time step.
+    category: Motion
+    color: "#99D2D2"
+    subcategory: Common
+    inputs:
+    - name: Time
+      default: "0.0"
+      description: Realtive time (seconds) from beginning of simulation.
+      validation:
+        oneOf:
+          - type: number
+            minimum: 0.0
+          - numLinks: one
+    - name: Entry
+      default: "[0.0,0.0,0.0]"
+      description: Location (meters) relative to the origin, or rotation angles (degrees).
+      validation:
+        oneOf:
+          - type: array
+            items:
+              type: number
+            minItems: 3
+            maxItems: 3
+          - numLinks: one
+    outputs:
+    - name: Entry
+      description: A timestamped entry.
+
+  WaypointLocationEngine:
+    category: Motion
+    color: "#99D2D2"
+    subcategory: Location Engines
+    tooltip: Lets user supply a set of waypoints to drive object motion as a function of time.
+    inputs:
+    - name: Position(s)
+      description: One or more TimeEntries.
+      validation:
+        numLinks: oneOrMany
+    - name: Frame
+      description: scene for East-North-Up coordinates, geodetic for Lat-Lon-Alt coordinate, ecef for Earth-Centered-Earth-Fixed coordinates.
+      default: "scene"
+      select: ["scene","geodetic","ecef"]
+    outputs:
+    - name: LocationEngine
+      description: A complete LocationEngine object.
+
+  StraightLineLocationEngine:
+    category: Motion
+    tooltip: Defines an object moving in a straight line (constant altitude, constant speed).
+    color: "#99D2D2"
+    subcategory: Location Engines
+    inputs:
+    - name: Position
+      default: "[0.0,0.0,0.0]"
+      description: Starting location (meters) relative to the origin.
+      validation:
+        oneOf:
+          - type: array
+            items:
+              type: number
+            minItems: 3
+            maxItems: 3
+          - numLinks: one
+    - name: Speed
+      description: Rate at which to move (meters/second).
+      default: "10.0"
+      validation:
+        oneOf:
+          - type: number
+            minimum: 0.0
+          - numLinks: one
+    - name: Heading
+      description: Direction in which to move (degrees).
+      default: "0.0"
+      validation:
+        oneOf:
+          - type: number
+          - numLinks: one
+    - name: Frame
+      description: scene for East-North-Up coordinates, geodetic for Lat-Lon-Alt coordinate, ecef for Earth-Centered-Earth-Fixed coordinates.
+      default: "scene"
+      select: ["scene","geodetic","ecef"]
+    outputs:
+    - name: LocationEngine
+      description: A complete LocationEngine object.
+
+  FixedLocationEngine:
+    category: Motion
+    tooltip: The desired object will not move as a function of time.
+    color: "#99D2D2"
+    subcategory: Location Engines
+    inputs:
+    - name: Position
+      default: "[0.0,0.0,0.0]"
+      description: Location (meters) relative to the origin.
+      validation:
+        oneOf:
+          - type: array
+            items:
+              type: number
+            minItems: 3
+            maxItems: 3
+          - numLinks: one
+    - name: Frame
+      description: scene for East-North-Up coordinates, geodetic for Lat-Lon-Alt coordinate, ecef for Earth-Centered-Earth-Fixed coordinates.
+      default: "scene"
+      select: ["scene","geodetic","ecef"]
+    outputs:
+    - name: LocationEngine
+      description: A complete LocationEngine object.
+
+  VelocityOrientationEngine:
+    category: Motion
+    color: "#99D2D2"
+    tooltip: Allows the user to specify orientation using the objects direction of motion.
+    help: dirsig_pkg/nodes/velocity_orientation.md
+    subcategory: Orientation Engines
+    inputs:
+    - name: Frame
+      description: scene for East-North-Up coordinates, geodetic for Lat-Lon-Alt coordinate, ecef for Earth-Centered-Earth-Fixed coordinates.
+      default: "scene"
+      select: ["scene","geodetic","ecef"]
+    outputs:
+    - name: OrientationEngine
+      description: A complete OrientationEngine object.
+
+  EulerOrientationEngine:
+    category: Motion
+    color: "#99D2D2"
+    tooltip: Allows the user to specify orientation using Euler angles as a function fo time.
+    subcategory: Orientation Engines
+    inputs:
+    - name: Orientation(s)
+      description: One or more TimeEntries where each represents a time dependent orientation.
+      validation:
+        numLinks: oneOrMany
+    - name: Rotation Order
+      description: Controls the order of how objects are rotated.
+      default: "xyz"
+      select: ["xyz","xzy","yxz","yzx","zxy","zyx"]
+    - name: Frame
+      description: scene for East-North-Up coordinates, geodetic for Lat-Lon-Alt coordinate, ecef for Earth-Centered-Earth-Fixed coordinates.
+      default: "scene"
+      select: ["scene","geodetic","ecef"]
+    outputs:
+    - name: OrientationEngine
+      description: A complete OrientationEngine object.
+
+  LookAtOrientationEngine:
+    category: Motion
+    color: "#99D2D2"
+    tooltip: Allows the user to focus on a specific point or object in the scene without specifying rotation angles.
+    subcategory: Orientation Engines
+    inputs:
+    - name: LocationEngine
+      description: Any location engine can be used here.
+      validation:
+        numLinks: one
+    - name: Up Vector
+      default: "[0.0,0.0,1.0]"
+      description: Defines up-vector of focal plane.
+      validation:
+        oneOf:
+          - type: array
+            items:
+              type: number
+            minItems: 3
+            maxItems: 3
+          - numLinks: one
+    outputs:
+    - name: OrientationEngine
+      description: A complete OrientationEngine object.
+
+
+  FlexMotion:
+    inputs:
+    - name: LocationEngine
+      description: Any location engine will work. If none are provided then the sensor will be placed at the origin.
+      validation:
+        numLinks: zeroOrOne
+    - name: OrientationEngine
+      description: Any orientation engine will work. If none are provided then the sensor will "look at" the origin.
+      validation:
+        numLinks: zeroOrOne
+    outputs:
+    - name: Motion
+      description: A complete FlexMotion object
+    tooltip: Controls the position and orientation of an object in the scene.
+    help: dirsig_pkg/nodes/flex_motion.md
+    category: Motion
+    color: "#99D2D2"
+    subcategory: Common

@@ -1,0 +1,1 @@
+Standard wooden picnic table.

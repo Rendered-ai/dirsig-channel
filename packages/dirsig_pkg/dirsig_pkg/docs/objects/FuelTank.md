@@ -1,0 +1,1 @@
+Fuel storage tank, large, fixed.

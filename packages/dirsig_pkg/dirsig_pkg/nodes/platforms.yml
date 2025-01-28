@@ -1,0 +1,214 @@
+
+#---------------------------------------
+# Copyright 2019-2025 DADoES, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License in the root directory in the "LICENSE" file or at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#---------------------------------------
+
+schemas:
+  WorldView3:
+    alias: Medium Resolution EO Platform
+    category: Platforms
+    subcategory: Sensors
+    tooltip: WorldView 3 VIS+NIR
+    help: dirsig_pkg/platforms/WorldView3.md
+    color: "#D4BF88"
+    inputs:
+    - name: Collect Intersection
+      default: T
+      select: [T, F]
+      validation:
+        type: string
+    - name: Collect Geolocation
+      default: F
+      select: [T, F]
+      validation:
+        type: string
+    - name: Flex Motion
+      validation:
+        numLinks: one
+    - name: File Schedule
+      default: simulation
+      select: [simulation, capture, task]
+    - name: Detector Clock Rate (Hz)
+      default: "30.0"
+      validation:
+        type: float
+    outputs:
+    - name: Sensor
+    
+  SuperDove:
+    alias: Low Resolution EO Platform
+    category: Platforms
+    subcategory: Sensors
+    tooltip: SuperDove VIS+NIR
+    help: dirsig_pkg/platforms/SuperDove.md
+    color: "#D4BF88"
+    inputs:
+    - name: Collect Intersection
+      default: T
+      select: [T, F]
+      validation:
+        type: string
+    - name: Collect Geolocation
+      default: F
+      select: [T, F]
+      validation:
+        type: string
+    - name: Collect Shadow
+      default: F
+      select: [T, F]
+      validation:
+        type: string
+    - name: Flex Motion
+      validation:
+        numLinks: one
+    - name: File Schedule
+      default: simulation
+      select: [simulation, capture, task]
+    - name: Detector Clock Rate (Hz)
+      default: "30.0"
+      validation:
+        type: float
+    outputs:
+    - name: Sensor
+    
+  SkySat:
+    alias: High Resolution EO Platform
+    category: Platforms
+    subcategory: Sensors
+    tooltip: SkySat PAN+VIS+NIR
+    help: dirsig_pkg/platforms/SkySat.md
+    color: '#D4BF88'
+    inputs:
+    - name: Collect Intersection
+      default: T
+      select: [T, F]
+      validation:
+        type: string
+    - name: Collect Geolocation
+      default: T
+      select: [T, F]
+      validation:
+        type: string
+    - name: Flex Motion
+      validation:
+        numLinks: one
+    - name: File Schedule
+      default: simulation
+      select: [simulation, capture, task]
+    - name: Detector Clock Rate (Hz)
+      default: "30.0"
+      validation:
+        type: float
+    outputs:
+    - name: Sensor
+    
+  Drone:
+    alias: Drone
+    category: Platforms
+    subcategory: Sensors
+    tooltip: RGB 35mm 1280x720 Camera
+    color: "#D4BF88"
+    inputs:
+    - name: Flex Motion
+      validation:
+        numLinks: one
+    - name: File Schedule
+      default: simulation
+      select: [simulation, capture, task]
+    - name: Detector Clock Rate (Hz)
+      default: "30.0"
+      validation:
+        type: float
+    outputs:
+    - name: Sensor
+    
+  SatelliteHSI:
+    alias: Airborne HSI Spectrometer
+    category: Platforms
+    subcategory: Sensors
+    tooltip: NASA's AVIRIS (Classic) airborne hyperspectral imaging system
+    color: "#D4BF88"
+    inputs:
+    - name: Collect Material
+      default: T
+      select: [T, F]
+      validation:
+        type: string
+    - name: Collect Intersection
+      default: F
+      select: [T, F]
+      validation:
+        type: string
+    - name: Collect Shadow
+      default: F
+      select: [T, F]
+      validation:
+        type: string
+    - name: Flex Motion
+      validation:
+        numLinks: one
+    - name: File Schedule
+      default: simulation
+      select: [simulation, capture, task]
+    - name: Detector Clock Rate (Hz)
+      default: "30.0"
+      validation:
+        type: float
+    outputs:
+    - name: Sensor
+
+  CustomRGBSensor:
+    category: Platforms
+    subcategory: Sensors
+    tooltip: A simple RGB sensor you can customize.
+    color: "#D4BF88"
+    inputs:
+    - name: Pixels
+      default: "[320,240]"
+      description: Number of pixels in x-dim and y-dim
+      validation:
+        oneOf:
+          - type: array
+            items:
+              type: integer
+              minimum: 1
+            minItems: 2
+            maxItems: 2
+          - numLinks: one
+    - name: Pixel Pitch
+      default: "[10,10]"
+      description: Size and spacing of pixels in x-dim and y-dim (microns)
+      validation:
+        oneOf:
+          - type: array
+            items:
+              type: float
+              minimum: 0.001
+            minItems: 2
+            maxItems: 2
+          - numLinks: one
+    - name: Focal Length
+      default: "30.0"
+      description: Focal length of sensor (millimeters)
+      validation:
+        oneOf:
+          - type: float
+            minimum: 0.00001
+          - numLinks: one
+    - name: Flex Motion
+      validation:
+        numLinks: one
+    outputs:
+    - name: Sensor

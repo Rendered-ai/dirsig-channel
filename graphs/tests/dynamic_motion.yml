@@ -1,0 +1,406 @@
+nodes:
+  B737_1:
+    alias: B737
+    color: '#3A4928'
+    hash: 92bdd2f77561a11f64322b35aac1963096c9cfe6
+    links: {}
+    location:
+      x: 1980.2372492009945
+      'y': 2219.1375676935368
+    name: B737_1
+    nodeClass: B737
+    ports:
+      inputs: []
+      outputs:
+        - description: ''
+          name: B737 Object
+    tooltip: Boeing 737
+    values: {}
+  DIRSIG5_16:
+    alias: DIRSIG5
+    color: '#F76902'
+    hash: 711be691fee6711276d56ce80665ac28f1a42800
+    links:
+      Scene:
+        - outputPort: Scene
+          sourceNode: Urban_9
+      Sensor:
+        - outputPort: Sensor
+          sourceNode: High Resolution EO Platform_15
+    location:
+      x: 4199.5001220703125
+      'y': 1085.9999889026988
+    name: DIRSIG5_16
+    nodeClass: DIRSIG5
+    ports:
+      inputs:
+        - description: ''
+          name: Sensor
+        - description: ''
+          name: Scene
+        - default: 1
+          description: ''
+          name: Capture Duration (s)
+          value: 1
+        - default: 2023-06-03T12:30
+          name: Reference Datetime
+        - default: Simple Solar Ephemeris
+          description: Set the ephemeris plugin
+          name: Ephemeris
+      outputs: []
+    tooltip: Simulate dirsig tasks and create associated truth and metadata
+    values:
+      Capture Duration (s): 1
+      Ephemeris: Simple Solar Ephemeris
+      Reference Datetime: 2023-06-03T12:30
+  DynamizeObjects_8:
+    color: '#3A4928'
+    hash: 1d9a42c5f76124d24cc8d63cb762d37028245af4
+    links:
+      Flex Motion:
+        - outputPort: Motion
+          sourceNode: FlexMotion_7
+      Objects:
+        - outputPort: B737 Object
+          sourceNode: B737_1
+    location:
+      x: 2670.591230912642
+      'y': 1945.1746770685368
+    name: DynamizeObjects_8
+    nodeClass: DynamizeObjects
+    ports:
+      inputs:
+        - description: ''
+          name: Flex Motion
+        - description: ''
+          name: Objects
+      outputs:
+        - description: ''
+          name: Objects
+    tooltip: Set an object's dynamic location and orientation
+    values: {}
+  FlexMotion_14:
+    color: '#99D2D2'
+    hash: 5b22926cfc3fd7f83e98fb5e43c91cfe4dd79177
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: WaypointLocationEngine_11
+      OrientationEngine:
+        - outputPort: OrientationEngine
+          sourceNode: LookAtOrientationEngine_13
+    location:
+      x: 2670.590986772017
+      'y': 304.22726717862224
+    name: FlexMotion_14
+    nodeClass: FlexMotion
+    ports:
+      inputs:
+        - description: ''
+          name: LocationEngine
+        - description: ''
+          name: OrientationEngine
+      outputs:
+        - description: ''
+          name: Motion
+    tooltip: Controls the position and orientation of an object in the scene.
+    values: {}
+  FlexMotion_7:
+    color: '#99D2D2'
+    hash: 5b22926cfc3fd7f83e98fb5e43c91cfe4dd79177
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: WaypointLocationEngine_5
+      OrientationEngine:
+        - outputPort: OrientationEngine
+          sourceNode: VelocityOrientationEngine_4
+    location:
+      x: 1906.1364191228695
+      'y': 1663.811934037642
+    name: FlexMotion_7
+    nodeClass: FlexMotion
+    ports:
+      inputs:
+        - description: ''
+          name: LocationEngine
+        - description: ''
+          name: OrientationEngine
+      outputs:
+        - description: ''
+          name: Motion
+    tooltip: Controls the position and orientation of an object in the scene.
+    values: {}
+  High Resolution EO Platform_15:
+    alias: High Resolution EO Platform
+    color: '#D4BF88'
+    hash: e32c59298f70c10aa69a2385a338204f780633b5
+    links:
+      Flex Motion:
+        - outputPort: Motion
+          sourceNode: FlexMotion_14
+    location:
+      x: 3435.045554421165
+      'y': 304.22726717862224
+    name: High Resolution EO Platform_15
+    nodeClass: High Resolution EO Platform
+    ports:
+      inputs:
+        - description: ''
+          name: Flex Motion
+        - default: 3
+          description: ''
+          name: Detector Clock Rate (Hz)
+          value: 3
+        - default: capture
+          description: ''
+          name: File Schedule
+          select:
+            - simulation
+            - capture
+            - task
+          value: capture
+        - default: T
+          name: Collect Intersection
+          select:
+            - T
+            - F
+        - default: T
+          name: Collect Geolocation
+          select:
+            - T
+            - F
+      outputs:
+        - description: ''
+          name: Sensor
+    tooltip: SkySat PAN+VIS+NIR
+    values:
+      Collect Geolocation: T
+      Collect Intersection: T
+      Detector Clock Rate (Hz): 3
+      File Schedule: capture
+  LookAtOrientationEngine_13:
+    color: '#99D2D2'
+    hash: 679c10efdb0f2452e3144f28f93572e4501a0b06
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: WaypointLocationEngine_5
+    location:
+      x: 1873.1652499112215
+      'y': 567.1057350852273
+    name: LookAtOrientationEngine_13
+    nodeClass: LookAtOrientationEngine
+    ports:
+      inputs:
+        - description: ''
+          name: LocationEngine
+        - default: '[0.0,0.0,1.0]'
+          description: Defines up-vector of focal plane.
+          name: Up Vector
+      outputs:
+        - description: ''
+          name: OrientationEngine
+    tooltip: >-
+      Allows the user to focus on a specific point or object in the scene
+      without specifying rotation angles.
+    values:
+      Up Vector: '[0.0,0.0,1.0]'
+  TimeEntry_10:
+    color: '#99D2D2'
+    hash: ec006df039f4b066eb82ec159568a345a8511855
+    links: {}
+    location:
+      x: 1141.6818514737215
+      'y': 203.36363081498575
+    name: TimeEntry_10
+    nodeClass: TimeEntry
+    ports:
+      inputs:
+        - default: 0
+          description: ''
+          name: Time
+          value: 0
+        - default: '[0,0,100000]'
+          description: ''
+          name: Entry
+          value: '[0,0,100000]'
+      outputs:
+        - description: ''
+          name: Entry
+    tooltip: Specifies an entry at one time step.
+    values:
+      Entry: '[0,0,100000]'
+      Time: 0
+  TimeEntry_2:
+    color: '#99D2D2'
+    hash: ec006df039f4b066eb82ec159568a345a8511855
+    links: {}
+    location:
+      x: 396.0850108753551
+      'y': 1300.2605812766335
+    name: TimeEntry_2
+    nodeClass: TimeEntry
+    ports:
+      inputs:
+        - default: 0
+          description: ''
+          name: Time
+          value: 0
+        - default: '[-100,0,5000]'
+          description: ''
+          name: Entry
+          value: '[-100,0,5000]'
+      outputs:
+        - description: ''
+          name: Entry
+    tooltip: Specifies an entry at one time step.
+    values:
+      Entry: '[-100,0,5000]'
+      Time: '-0.1'
+  TimeEntry_3:
+    color: '#99D2D2'
+    hash: ec006df039f4b066eb82ec159568a345a8511855
+    links: {}
+    location:
+      x: 414.94270740855825
+      'y': 1566.797402121804
+    name: TimeEntry_3
+    nodeClass: TimeEntry
+    ports:
+      inputs:
+        - default: 1
+          description: ''
+          name: Time
+          value: 1
+        - default: '[+100,0,5000]'
+          description: ''
+          name: Entry
+          value: '[+100,0,5000]'
+      outputs:
+        - description: ''
+          name: Entry
+    tooltip: Specifies an entry at one time step.
+    values:
+      Entry: '[+100,0,5000]'
+      Time: '1.1'
+  Urban_9:
+    alias: Urban
+    color: '#3A4928'
+    hash: d8084683d45b589b2d747633542c9cbd21615944
+    links:
+      Objects:
+        - outputPort: Objects
+          sourceNode: DynamizeObjects_8
+    location:
+      x: 3435.045554421165
+      'y': 1968.6363469904118
+    name: Urban_9
+    nodeClass: Urban
+    ports:
+      inputs:
+        - default: null
+          description: ''
+          name: Objects
+      outputs:
+        - description: ''
+          name: Scene
+    tooltip: High resolution scene 3km X 3km.
+    values: {}
+  VelocityOrientationEngine_4:
+    color: '#99D2D2'
+    hash: dd2e59784f6adc8e014a58f5bda703c958fe1a12
+    links: {}
+    location:
+      x: 1195.2090343128552
+      'y': 1728.0944740988991
+    name: VelocityOrientationEngine_4
+    nodeClass: VelocityOrientationEngine
+    ports:
+      inputs:
+        - default: scene
+          description: >-
+            scene for East-North-Up coordinates, geodetic for Lat-Lon-Alt
+            coordinate, ecef for Earth-Centered-Earth-Fixed coordinates.
+          name: Frame
+          select:
+            - scene
+            - geodetic
+            - ecef
+      outputs:
+        - description: A complete OrientationEngine object.
+          name: OrientationEngine
+    tooltip: >-
+      Allows the user to specify orientation using the objects direction of
+      motion.
+    values:
+      Frame: scene
+  WaypointLocationEngine_11:
+    color: '#99D2D2'
+    hash: 0ea1541f8f3687228acc10799173db809e5ee5ea
+    links:
+      Position(s):
+        - outputPort: Entry
+          sourceNode: TimeEntry_10
+    location:
+      x: 1906.1364191228695
+      'y': 203.36363081498575
+    name: WaypointLocationEngine_11
+    nodeClass: WaypointLocationEngine
+    ports:
+      inputs:
+        - description: ''
+          name: Position(s)
+        - default: scene
+          description: >-
+            scene for East-North-Up coordinates, geodetic for Lat-Lon-Alt
+            coordinate, ecef for Earth-Centered-Earth-Fixed coordinates.
+          name: Frame
+          select:
+            - scene
+            - geodetic
+            - ecef
+      outputs:
+        - description: ''
+          name: LocationEngine
+    tooltip: >-
+      Lets user supply a set of waypoints to drive object motion as a function
+      of time.
+    values:
+      Frame: scene
+  WaypointLocationEngine_5:
+    color: '#99D2D2'
+    hash: 0ea1541f8f3687228acc10799173db809e5ee5ea
+    links:
+      Position(s):
+        - outputPort: Entry
+          sourceNode: TimeEntry_2
+        - outputPort: Entry
+          sourceNode: TimeEntry_3
+    location:
+      x: 1154.882168856534
+      'y': 1410.8997802734375
+    name: WaypointLocationEngine_5
+    nodeClass: WaypointLocationEngine
+    ports:
+      inputs:
+        - description: ''
+          name: Position(s)
+        - default: scene
+          description: >-
+            scene for East-North-Up coordinates, geodetic for Lat-Lon-Alt
+            coordinate, ecef for Earth-Centered-Earth-Fixed coordinates.
+          name: Frame
+          select:
+            - scene
+            - geodetic
+            - ecef
+      outputs:
+        - description: ''
+          name: LocationEngine
+    tooltip: >-
+      Lets user supply a set of waypoints to drive object motion as a function
+      of time.
+    values:
+      Frame: scene
+version: 2

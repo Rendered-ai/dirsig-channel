@@ -1,0 +1,106 @@
+nodes:
+  Object1:
+    nodeClass: House1
+  Object2:
+    nodeClass: House2
+  
+  Cluster1:
+    nodeClass: ClusterObjects
+    links:
+      Objects:
+        - sourceNode: Object1
+          outputPort: House Object
+    values:
+      Number of Objects: 30
+      Radius (m): 100
+      Scene Location (m, m): "[-50, 0]"
+  
+  Cluster2:
+    nodeClass: ClusterObjects
+    links:
+      Objects:
+        - sourceNode: Object2
+          outputPort: House Object
+    values:
+      Number of Objects: 30
+      Radius (m): 100
+      Scene Location (m, m): "[50, 0]"
+
+  Scene:
+    nodeClass: Desert Highway
+    links:
+      Objects:
+        - sourceNode: Cluster1
+          outputPort: Objects
+        - sourceNode: Cluster2
+          outputPort: Objects
+
+  Position1:
+    nodeClass: TimeEntry
+    values:
+      Time: 0.0
+      Entry: "[0,0,200000]"
+
+  Waypoint1:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - sourceNode: Position1
+          outputPort: Entry
+
+  Position3:
+    nodeClass: TimeEntry
+    values:
+      Time: 0.0
+      Entry: "[0,0,0]"
+
+  Waypoint2:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - sourceNode: Position3
+          outputPort: Entry
+
+  LookAt:
+    nodeClass: LookAtOrientationEngine
+    links:
+      LocationEngine:
+        - sourceNode: Waypoint2
+          outputPort: LocationEngine
+  
+  SensorPlacement:
+   nodeClass: FlexMotion
+   links:
+      LocationEngine:
+        - sourceNode: Waypoint1
+          outputPort: LocationEngine
+      OrientationEngine:
+        - sourceNode: LookAt
+          outputPort: OrientationEngine
+
+  Sensor:
+    name: sensor
+    nodeClass: High Resolution EO Platform
+    links:
+      Flex Motion:
+        - sourceNode: SensorPlacement
+          outputPort: Motion
+
+  Ephemeris:
+    nodeClass: Fixed Ephemeris
+    values:
+      Solar Zenith: 35
+
+  Simulate:
+    nodeClass: DIRSIG5
+    links:
+      Sensor:
+        - outputPort: Sensor
+          sourceNode: Sensor
+      Scene:
+        - outputPort: Scene
+          sourceNode: Scene
+      Ephemeris:
+        - outputPort: Ephemeris
+          sourceNode: Ephemeris
+version: 2

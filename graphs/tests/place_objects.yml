@@ -1,0 +1,105 @@
+nodes:
+  Object:
+    nodeClass: Tri-bar Target
+  
+  Scale:
+    nodeClass: ScaleObjects
+    links:
+      Objects:
+        - sourceNode: Object
+          outputPort: Tri-bar Object
+    values:
+      Scale Factors: "[20, 20, 1]"
+  
+  Pose_0:
+    nodeClass: PoseObjects
+    links:
+      Objects:
+        - sourceNode: Scale
+          outputPort: Objects
+    values:
+      Translation (m): "[20,-20,3]"
+      Rotation (deg): "[0,0,30]"
+      Match Slope: "True"
+
+  Pose_1:
+    nodeClass: PoseObjects
+    links:
+      Objects:
+        - sourceNode: Scale
+          outputPort: Objects
+    values:
+      Translation (m): "[-60,20,3]"
+      Rotation (deg): "[0,0,0]"
+      Match Slope: "True"
+
+  Scene:
+    nodeClass: Sierra Nevada
+    links:
+      Objects:
+        - sourceNode: Pose_0
+          outputPort: Objects
+        - sourceNode: Pose_1
+          outputPort: Objects
+
+  TimeEntry:
+    nodeClass: TimeEntry
+    values:
+      Time: 0.0
+      Entry: "[0,0,100000]"
+
+  Waypoint:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - sourceNode: TimeEntry
+          outputPort: Entry
+
+  Fixed:
+    nodeClass: FixedLocationEngine
+    values:
+      Position: "[0,0,0]"
+
+  LookAt:
+    nodeClass: LookAtOrientationEngine
+    links:
+      LocationEngine:
+        - sourceNode: Fixed
+          outputPort: LocationEngine
+
+  SensorPlacement:
+   nodeClass: FlexMotion
+   links:
+      LocationEngine:
+        - sourceNode: Waypoint
+          outputPort: LocationEngine
+      OrientationEngine:
+        - sourceNode: LookAt
+          outputPort: OrientationEngine
+
+  Sensor:
+    name: sensor
+    nodeClass: High Resolution EO Platform
+    links:
+      Flex Motion:
+        - sourceNode: SensorPlacement
+          outputPort: Motion
+
+  Ephemeris:
+    nodeClass: Fixed Ephemeris
+    values:
+      Solar Zenith: 35
+
+  Simulate:
+    nodeClass: DIRSIG5
+    links:
+      Sensor:
+        - outputPort: Sensor
+          sourceNode: Sensor
+      Scene:
+        - outputPort: Scene
+          sourceNode: Scene
+      Ephemeris:
+        - outputPort: Ephemeris
+          sourceNode: Ephemeris
+version: 2

@@ -1,0 +1,1 @@
+Trash can with decorative metal enclosure commonly seen in public areas such as parks.

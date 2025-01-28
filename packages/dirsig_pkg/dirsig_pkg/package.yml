@@ -1,0 +1,82 @@
+#For prod
+volumes:
+  dirsig-shared: 'da879e27-9ac6-4fc4-b178-aad21dc0cf0b' # Rendered.ai dirsig-shared (Desert Highway v2, Sierra Nevada, LWIR_Urban_Alt, Bundle Inventory)
+
+# Define objects.
+objects:
+  Bench:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/bench/bench.glist
+  Concrete Barrier:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/concrete_barrier/concrete_barrier.glist
+  Concrete Parking Bumper:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/concrete_parking_bumper/concrete_parking_bumper.glist
+  0.43m_8.4cm:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/drainage_pipe/drainage_pipe_0.43m_8.4cm.glist
+  1m_29cm:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/drainage_pipe/drainage_pipe_1m_29cm.glist
+  5m_74cm:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/drainage_pipe/drainage_pipe_5m_74cm.glist
+  Electrical Transformer:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/electrical_transformer/electrical_transformer.glist
+  Firehydrant:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/firehydrant/firehydrant.glist
+  Fuel Tank:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/fuel_tank/fuel_tank.glist
+  House1:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/houses/house1.glist
+  House2:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/houses/house2.glist
+  Ladder:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/ladder/ladder.glist
+  Macbeth:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/macbeth/macbeth.glist
+  Picnic Table:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/picnic_table/picnic_table.glist
+  Shipping Container:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/shipping_container/shipping_container_40_ft.glist
+  Brush1:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/shrubs/brush1.glist
+  Brush2:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/shrubs/brush2.glist
+  Brush3:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/shrubs/brush3.glist
+  Brush4:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/shrubs/brush4.glist
+  Brush5:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/shrubs/brush5.glist
+  Hobble Bush:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/shrubs/Hobblebush.glist
+  Steel Drum:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/steel_drum/steel_drum.glist
+  Steel Grate:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/steel_grate/steel_grate.glist
+  Steel Work Table:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/steel_work_table/steel_work_table.glist
+  Stepping Stone:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/stepping_stone/stepping_stone.glist
+  3m_1bulb:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/street_lights/3m_1bulb.glist
+  4m_2bulb:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/street_lights/3m_1bulb.glist
+  15m_3bulb:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/street_lights/15m_3bulb.glist
+  Tire And Wheel:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/tire_and_wheel/tire_and_wheel.glist
+  Traffic Cone:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/traffic_cone/traffic_cone.glist
+  Dogwood:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/trees/dogwood.glist
+  Red Maple:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/trees/red_maple.glist
+  Silver Maple:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/trees/silver_maple.glist
+  Tribar:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/tribar/tribar.glist
+  Vehicles:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/vehicles/toyota_corolla.glist
+  Waste Bins:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/waste_bins/trashcan/trashcan.glist
+  Wood Pallet:
+    filename: dirsig-shared:BundleInventory-04-Dec-2023/wood_pallet/wood_pallet.glist
+  B737:
+    filename: dirsig-shared:Bundles/737/737.glist

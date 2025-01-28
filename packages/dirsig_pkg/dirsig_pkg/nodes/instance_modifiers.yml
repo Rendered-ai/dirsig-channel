@@ -1,0 +1,103 @@
+
+#---------------------------------------
+# Copyright 2019-2025 DADoES, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License in the root directory in the "LICENSE" file or at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#---------------------------------------
+
+schemas:
+  ScaleObjects:
+    tooltip: Scale the object's size by XYZ multiplicative factors
+    category: Scenes
+    subcategory: Object Modifiers
+    color: '#3A4928'
+    inputs:
+    - name: Objects
+      description: One or more objects to scale
+      validation:
+        numLinks: oneOrMany
+    - name: Scale Factors
+      description: Multiplicative factors to stretch or shrink the object
+      default: "[1.0, 1.0, 1.0]"
+    outputs:
+    - name: Objects
+      description: Scaled input objects
+
+  DynamizeObjects:
+    tooltip: Set an object's dynamic location and orientation
+    category: Scenes
+    subcategory: Object Modifiers
+    color: '#3A4928'
+    inputs:
+    - name: Objects
+      description: One or more objects to make dynamic
+      validation:
+        numLinks: oneOrMany
+    - name: Flex Motion
+      validation:
+        numLinks: one
+    outputs:
+    - name: Objects
+      description: Dynamized input objects
+  
+  PoseObjects:
+    tooltip: Explicitly set an object's location and orientation
+    category: Scenes
+    subcategory: Object Modifiers
+    color: '#3A4928'
+    inputs:
+    - name: Objects
+      description: One or more objects to modify
+      validation:
+        numLinks: oneOrMany
+    - name: Translation (m)
+      description: Additive factors to move the object
+      default: "[0.0, 0.0, 0.0]"
+    - name: Rotation (deg)
+      description: Additive factors to rotate the object
+      default: "[0.0, 0.0, 0.0]"
+    - name: Match Slope
+      description: Rotate the object to match the slope of the terrain; overrides the Rotation setting
+      default: "False"
+      select:
+      - "True"
+      - "False"
+    outputs:
+    - name: Objects
+      description: Objects with updated position
+    
+  ClusterObjects:
+    tooltip: Place an bunch of objects near a specific location
+    category: Scenes
+    subcategory: Object Modifiers
+    color: '#3A4928'
+    inputs: 
+    - name: Objects
+      description: Objects to place
+      validation:
+        numLinks: oneOrMany
+    - name: Scene Location (m, m)
+      description: Location in scene coordinates to place the object
+      default: "[0, 0]"
+      validation:
+        oneOf:
+          - type: array
+          - numLinks: one
+    - name: Number of Objects
+      description: How many object to place
+      default: 1
+    - name: Radius (m)
+      description: Extent of cluster
+      default: 1.0
+    outputs:
+    - name: Objects

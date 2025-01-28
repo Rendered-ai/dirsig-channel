@@ -1,0 +1,1 @@
+Standard steel drum barrel.

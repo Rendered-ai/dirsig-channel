@@ -1,0 +1,1 @@
+'Toyota Corolla, random color. Alternates with specific colors available: toyota_corolla_X.glist, where X can be black, blue, dark_gray, green, light_gray, red, white'

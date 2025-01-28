@@ -1,0 +1,60 @@
+
+#---------------------------------------
+# Copyright 2019-2025 DADoES, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License in the root directory in the "LICENSE" file or at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#---------------------------------------
+
+schemas:
+  
+  SierraNevada:
+    alias: Sierra Nevada
+    tooltip: Low resolution scene 150km x 150km.
+    category: Scenes
+    subcategory: Backgrounds
+    help: dirsig_pkg/scenes/SierraNevada.md
+    thumbnail: dirsig_pkg/scenes/SierraNevadaThumbnail.png
+    color: '#3A4928'
+    inputs: 
+    - name: Objects
+      default: null
+    outputs:
+    - name: Scene
+  
+  DesertHighwayScene:
+    alias: Desert Highway
+    tooltip: High resolution scene 6km X 6km.
+    category: Scenes
+    subcategory: Backgrounds
+    help: dirsig_pkg/scenes/DesertHighway.md
+    
+    color: '#3A4928'
+    inputs: 
+    - name: Objects
+      default: null
+    outputs:
+    - name: Scene
+  
+  LWIRUrbanAltScene:
+    alias: Urban
+    tooltip: High resolution scene 3km X 3km.
+    category: Scenes
+    subcategory: Backgrounds
+    help: dirsig_pkg/scenes/LWIRUrban.md
+    thumbnail: dirsig_pkg/scenes/LWIRUrbanThumbnail.png
+    color: '#3A4928'
+    inputs: 
+    - name: Objects
+      default: null
+    outputs:
+    - name: Scene

@@ -1,0 +1,392 @@
+
+#---------------------------------------
+# Copyright 2019-2025 DADoES, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License in the root directory in the "LICENSE" file or at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#---------------------------------------
+
+schemas:
+  BenchNode:
+    alias: Bench
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Bench Object
+    subcategory: Bundle Inventory
+    tooltip: A simple bench from the RITBusLoop scene
+    help: dirsig_pkg/objects/Bench.md
+    thumbnail: dirsig_pkg/objects/Bench.png
+  ConcreteBarrierNode:
+    alias: Concrete Barrier
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Concrete Barrier Object
+    subcategory: Bundle Inventory
+    tooltip: A barrier one might see on the side of a highway
+    help: dirsig_pkg/objects/ConcreteBarrier.md
+    thumbnail: dirsig_pkg/objects/ConcreteBarrier.png
+  ConcreteParkingBumperNode:
+    alias: Concrete Parking Bumper
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Concrete Parking Bumper Object
+    subcategory: Bundle Inventory
+    tooltip: A concrete bumper commonly used in parking lots
+    help: dirsig_pkg/objects/ConcreteParkingBumper.md
+    thumbnail: dirsig_pkg/objects/ConcreteParkingBumper.png
+  DrainagePipeNode:
+    alias: Drainage Pipe
+    category: Scenes
+    subcategory: Bundle Inventory
+    tooltip: Straight, shiny, metal drainage pipes that are X meters long and Y centimeters
+      in diameter.
+    help: dirsig_pkg/objects/DrainagePipe.md
+    thumbnail: dirsig_pkg/objects/DrainagePipe2.png
+    color: '#3A4928'
+    inputs: 
+    - name: Type
+      description: Choose the type of drainage pipe.
+      default: 1m_29cm
+      select:
+      - 0.43m_8.4cm
+      - 1m_29cm
+      - 5m_74cm
+    outputs:
+    - description: Object generator
+      name: Drainage Pipe Object
+  ElectricalTransformerNode:
+    alias: Electrical Transformer
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Electrical Transformer Object
+    subcategory: Bundle Inventory
+    tooltip: White metal transformer box
+    help: dirsig_pkg/objects/ElectricalTransformer.md
+    thumbnail: dirsig_pkg/objects/ElectricalTransformer.png
+  FirehydrantNode:
+    alias: Firehydrant
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Firehydrant Object
+    subcategory: Bundle Inventory
+    tooltip: Standard fire hydrant
+    help: dirsig_pkg/objects/Firehydrant.md
+    thumbnail: dirsig_pkg/objects/Firehydrant.png
+  FuelTankNode:
+    alias: Fuel Tank
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Fuel Tank Object
+    subcategory: Bundle Inventory
+    tooltip: Fuel storage tank, large, fixed
+    help: dirsig_pkg/objects/FuelTank.md
+    thumbnail: dirsig_pkg/objects/FuelTank.png
+  HobbleBushNode:
+    alias: Hobble Bush
+    category: Scenes
+    subcategory: Bundle Inventory
+    tooltip: Shrub
+    help: dirsig_pkg/objects/HobbleBush.md
+    thumbnail: dirsig_pkg/objects/HobbleBush.png
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - name: Bush Object
+      description: Object generator
+  House1Node:
+    alias: House1
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: House Object
+    subcategory: Bundle Inventory
+    tooltip: House from MegaScene1
+    help: dirsig_pkg/objects/House1.md
+    thumbnail: dirsig_pkg/objects/House1.png
+  House2Node:
+    alias: House2
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: House Object
+    subcategory: Bundle Inventory
+    tooltip: House from MegaScene1
+    help: dirsig_pkg/objects/House2.md
+    thumbnail: dirsig_pkg/objects/House2.png
+  LadderNode:
+    alias: Ladder
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Ladder Object
+    subcategory: Bundle Inventory
+    tooltip: Standard tall ladder
+    help: dirsig_pkg/objects/Ladder.md
+    thumbnail: dirsig_pkg/objects/Ladder.png
+  MacbethNode:
+    alias: Macbeth Color Chart
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Color Chart Object
+    subcategory: Bundle Inventory
+    tooltip: Macbeth Color Chart
+    help: dirsig_pkg/objects/MacbethColorChart.md
+    thumbnail: dirsig_pkg/objects/MacbethColorChart.png
+  PicnicTableNode:
+    alias: Picnic Table
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Picnic Table Object
+    subcategory: Bundle Inventory
+    tooltip: Standard wooden picnic table
+    help: dirsig_pkg/objects/PicnicTable.md
+    thumbnail: dirsig_pkg/objects/PicnicTable.png
+  ShippingContainerNode:
+    alias: Shipping Container
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Shipping Container Object
+    subcategory: Bundle Inventory
+    tooltip: 40 foot shipping container
+    help: dirsig_pkg/objects/ShippingContainer.md
+    thumbnail: dirsig_pkg/objects/ShippingContainer.png
+  ShrubsNode:
+    alias: Shrubs
+    category: Scenes
+    subcategory: Bundle Inventory
+    tooltip: Various shrub bushes.
+    help: dirsig_pkg/objects/Shrubs.md
+    thumbnail: dirsig_pkg/objects/ShrubsBrush1.png
+    color: '#3A4928'
+    inputs: 
+    - name: Shrub Choice
+      description: Choose the type of shrub to be added.
+      default: any
+      select:
+      - any
+      - Brush1
+      - Brush2
+      - Brush3
+      - Brush4
+      - Brush5
+    outputs:
+    - name: Shrubs Object
+      description: Object generator
+  SteelDrumNode:
+    alias: Steel Drum
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Steel Drum Object
+    subcategory: Bundle Inventory
+    tooltip: Standard steel drum barrel
+    help: dirsig_pkg/objects/SteelDrum.md
+    thumbnail: dirsig_pkg/objects/SteelDrum.png
+  SteelGrateNode:
+    alias: Steel Grate
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Steel Grate Object
+    subcategory: Bundle Inventory
+    tooltip: Small steel drainage grate
+    help: dirsig_pkg/objects/SteelGrate.md
+    thumbnail: dirsig_pkg/objects/SteelGrate.png
+  SteelWorkTableNode:
+    alias: Steel Work Table
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Steel Work Table Object
+    subcategory: Bundle Inventory
+    tooltip: Work table/cart made of steel with black tires
+    help: dirsig_pkg/objects/SteelWorkTable.md
+    thumbnail: dirsig_pkg/objects/SteelWorkTable.png
+  SteppingStoneNode:
+    alias: Stepping Stone
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Stepping Stone Object
+    subcategory: Bundle Inventory
+    tooltip: Landscaping square stone
+    help: dirsig_pkg/objects/SteppingStone.md
+    thumbnail: dirsig_pkg/objects/SteppingStone.png
+  StreetLightsNode:
+    alias: Street Lights
+    category: Scenes
+    subcategory: Bundle Inventory
+    tooltip: 'Various street lights X meters tall and with Y lights. Options include:
+      3m_1bulb, 4m_2bulb, 15m_3bulb'
+    help: dirsig_pkg/objects/StreetLights.md
+    thumbnail: dirsig_pkg/objects/Streetlights15m_3bulb.png
+    color: '#3A4928'
+    inputs: 
+    - name: Type
+      description: Choose the type of street light.
+      default: 15m_3bulb
+      select:
+      # - any
+      # - 3m_1bulb
+      # - 4m_2bulb
+      - 15m_3bulb
+    outputs:
+    - description: Object generator
+      name: Street Lights Object
+  TireAndWheelNode:
+    alias: Tire And Wheel
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Tire And Wheel Object
+    subcategory: Bundle Inventory
+    tooltip: A tire on the rim
+    help: dirsig_pkg/objects/TireAndWheel.md
+    thumbnail: dirsig_pkg/objects/TireAndWheel.png
+  TrafficConeNode:
+    alias: Traffic Cone
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Traffic Cone Object
+    subcategory: Bundle Inventory
+    tooltip: Standard traffic cone
+    help: dirsig_pkg/objects/TrafficCone.md
+    thumbnail: dirsig_pkg/objects/TrafficCone.png
+  TreesNode:
+    alias: Trees
+    category: Scenes
+    color: '#3A4928'
+    inputs:
+    - name: Tree Choice
+      description: Choose the type of tree.
+      default: any
+      select:
+      - any
+      - Dogwood
+      - Red Maple
+      - Silver Maple
+    outputs:
+    - description: Object generator
+      name: Trees Object
+    subcategory: Bundle Inventory
+    tooltip: Silver Maple tree from MegaScene1, 1m minimum GSD recommended
+    help: dirsig_pkg/objects/Trees.md
+    thumbnail: dirsig_pkg/objects/TreesDogwood.png
+  TribarNode:
+    alias: Tri-bar Target
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Tri-bar Object
+    subcategory: Bundle Inventory
+    tooltip: Air Force bar target, 1m x 1m
+    help: dirsig_pkg/objects/TribarTarget.md
+    thumbnail: dirsig_pkg/objects/TribarTarget.png
+  VehiclesNode:
+    alias: Vehicles
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Vehicles Object
+    subcategory: Bundle Inventory
+    tooltip: 'Toyota Corolla, random color. Alternates with specific colors available:
+      toyota_corolla_X.glist, where X can be black, blue, dark_gray, green, light_gray,
+      red, white'
+    help: dirsig_pkg/objects/Vehicles.md
+    thumbnail: dirsig_pkg/objects/Vehicles.png
+  WasteBinsNode:
+    alias: Waste Bins
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Waste Bins Object
+    subcategory: Bundle Inventory
+    tooltip: Trash can with decorative metal enclosure commonly seen in public areas
+      such as parks
+    help: dirsig_pkg/objects/WasteBins.md
+    thumbnail: dirsig_pkg/objects/WasteBins.png
+  WoodPalletNode:
+    alias: Wood Pallet
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: Wood Pallet Object
+    subcategory: Bundle Inventory
+    tooltip: Standard wooden pallet
+    help: dirsig_pkg/objects/WoodPallet.md
+    thumbnail: dirsig_pkg/objects/WoodPallet.png
+  B737Node:
+    alias: B737
+    category: Scenes
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - description: Object generator
+      name: B737 Object
+    subcategory: Bundle Inventory
+    tooltip: Boeing 737
+    help: dirsig_pkg/objects/B737.md
+    thumbnail: dirsig_pkg/objects/B737.png

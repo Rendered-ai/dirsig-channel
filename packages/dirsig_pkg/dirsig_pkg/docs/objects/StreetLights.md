@@ -1,0 +1,1 @@
+Street light X meters tall and with Y lights.

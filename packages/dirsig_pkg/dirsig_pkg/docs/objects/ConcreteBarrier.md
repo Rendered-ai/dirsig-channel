@@ -1,0 +1,1 @@
+A barrier one might see on the side of a highway.

@@ -1,0 +1,1 @@
+Air Force bar target, 1m x 1m.

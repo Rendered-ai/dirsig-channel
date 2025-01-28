@@ -1,0 +1,1 @@
+A concrete bumper commonly used in parking lots.

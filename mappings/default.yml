@@ -1,0 +1,5 @@
+classes: # Categories for ML
+  0: [none, Plume]
+  99: [none, Distractor]
+properties: # Ana metadata uses (from the package) ObjectGenerator.object_type
+  obj['type'] == 'Plume': 0

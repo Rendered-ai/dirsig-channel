@@ -1,0 +1,106 @@
+nodes:
+  Object:
+    nodeClass: Tri-bar Target
+  
+  Scale:
+    nodeClass: ScaleObjects
+    links:
+      Objects:
+        - sourceNode: Object
+          outputPort: Tri-bar Object
+    values:
+      Scale Factors: "[100, 100, 1]"
+  
+  Pose:
+    nodeClass: PoseObjects
+    links:
+      Objects:
+        - sourceNode: Scale
+          outputPort: Objects
+    values:
+      Translation (m): "[0,0,5]"
+      Rotation (deg): "[0,0,90]"
+      Match Slope: "True"
+
+  Scene:
+    nodeClass: Desert Highway
+    links:
+      Objects:
+        - sourceNode: Pose
+          outputPort: Objects
+
+  Position1:
+    nodeClass: TimeEntry
+    values:
+      Time: 0.0
+      Entry: "[0,0,300000]"
+  Position2:
+    nodeClass: TimeEntry
+    values:
+      Time: 1.0
+      Entry: "[5,0,300000]"
+
+  Waypoint1:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - sourceNode: Position1
+          outputPort: Entry
+        - sourceNode: Position2
+          outputPort: Entry
+
+  Position3:
+    nodeClass: TimeEntry
+    values:
+      Time: 0.0
+      Entry: "[0,0,0]"
+  Position4:
+    nodeClass: TimeEntry
+    values:
+      Time: 1.0
+      Entry: "[5000,0,0]"
+
+  Waypoint2:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - sourceNode: Position3
+          outputPort: Entry
+        - sourceNode: Position4
+          outputPort: Entry
+
+  LookAt:
+    nodeClass: LookAtOrientationEngine
+    links:
+      LocationEngine:
+        - sourceNode: Waypoint2
+          outputPort: LocationEngine
+
+  SensorPlacement:
+   nodeClass: FlexMotion
+   links:
+      LocationEngine:
+        - sourceNode: Waypoint1
+          outputPort: LocationEngine
+      OrientationEngine:
+        - sourceNode: LookAt
+          outputPort: OrientationEngine
+
+  Sensor:
+    name: sensor
+    nodeClass: Low Resolution EO Platform
+    links:
+      Flex Motion:
+        - sourceNode: SensorPlacement
+          outputPort: Motion
+
+  Simulate:
+    nodeClass: DIRSIG5
+    links:
+      Sensor:
+        - outputPort: Sensor
+          sourceNode: Sensor
+      Scene:
+        - outputPort: Scene
+          sourceNode: Scene
+version: 2

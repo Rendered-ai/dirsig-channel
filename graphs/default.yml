@@ -1,0 +1,95 @@
+nodes:
+  Object_Bench:
+    nodeClass: Bench
+  Object_Table:
+    nodeClass: Picnic Table
+
+  Pose_Table:
+    nodeClass: PoseObjects
+    links:
+      Objects:
+        - sourceNode: Object_Table
+          outputPort: Picnic Table Object
+    values:
+      Translation (m): "[0,90,4]"
+  
+  Cluster_Benches:
+    nodeClass: ClusterObjects
+    links:
+      Objects:
+        - sourceNode: Object_Bench
+          outputPort: Bench Object
+    values:
+      Number of Objects: 10
+      Radius (m): 10
+      Scene Location (m, m): "[-10, 80]"
+
+  Scene0:
+    nodeClass: Desert Highway
+    links:
+      Objects:
+        - sourceNode: Cluster_Benches
+          outputPort: Objects
+        - sourceNode: Pose_Table
+          outputPort: Objects
+  
+  Position_DroneLocation:
+    nodeClass: TimeEntry
+    values:
+      Time: 0.0
+      Entry: "[0,20,50]"
+
+  Waypoint_DroneLocation:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - sourceNode: Position_DroneLocation
+          outputPort: Entry
+
+  Position_LookAt:
+    nodeClass: TimeEntry
+    values:
+      Time: 0.0
+      Entry: "[0,90,10]"
+
+  Waypoint_LookAt:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - sourceNode: Position_LookAt
+          outputPort: Entry
+
+  LookAt:
+    nodeClass: LookAtOrientationEngine
+    links:
+      LocationEngine:
+        - sourceNode: Waypoint_LookAt
+          outputPort: LocationEngine
+
+  SensorPlacement:
+   nodeClass: FlexMotion
+   links:
+      LocationEngine:
+        - sourceNode: Waypoint_DroneLocation
+          outputPort: LocationEngine
+      OrientationEngine:
+        - sourceNode: LookAt
+          outputPort: OrientationEngine
+
+  Sensor0:
+    nodeClass: Drone
+    links:
+      Flex Motion:
+        - sourceNode: SensorPlacement
+          outputPort: Motion
+
+  Simulate:
+    nodeClass: DIRSIG5
+    links:
+      Sensor:
+        - sourceNode: Sensor0
+          outputPort: Sensor
+      Scene:
+        - sourceNode: Scene0
+          outputPort: Scene
+version: 2

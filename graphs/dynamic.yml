@@ -1,0 +1,122 @@
+nodes:
+  Object:
+    nodeClass: B737
+
+  Position2:
+    nodeClass: TimeEntry
+    values:
+      Time: 0.0
+      Entry: "[-100,0,5000]"
+
+  Position3:
+    nodeClass: TimeEntry
+    values:
+      Time: 1.0
+      Entry: "[+100,0,5000]"
+
+  Velocity:
+    nodeClass: VelocityOrientationEngine
+
+  Waypoint2:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - sourceNode: Position2
+          outputPort: Entry
+        - sourceNode: Position3
+          outputPort: Entry
+
+  Fixed2:
+    nodeClass: FixedLocationEngine
+    values:
+      Position: "[25,0,5000]"
+
+  ObjectPlacement:
+   nodeClass: FlexMotion
+   links:
+      LocationEngine:
+        - sourceNode: Waypoint2
+          outputPort: LocationEngine
+      OrientationEngine:
+        - sourceNode: LookAt
+          outputPort: OrientationEngine
+
+  Dynamize:
+    nodeClass: DynamizeObjects
+    links:
+      Flex Motion:
+        - sourceNode: ObjectPlacement
+          outputPort: Motion
+      Objects:
+        - outputPort: B737 Object
+          sourceNode: Object
+
+  Scene:
+    #nodeClass: Sierra Nevada
+    # nodeClass: Desert Highway
+    nodeClass: Urban
+    links:
+      Objects:
+        - outputPort: Objects
+          sourceNode: Dynamize
+
+  Position1:
+    nodeClass: TimeEntry
+    values:
+      Time: 0.0
+      Entry: "[0,0,100000]"
+
+  Waypoint:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - sourceNode: Position1
+          outputPort: Entry
+
+  Fixed:
+    nodeClass: FixedLocationEngine
+    values:
+      Position: "[0,0,0]"
+
+  LookAt:
+    nodeClass: LookAtOrientationEngine
+    links:
+      LocationEngine:
+        - sourceNode: Fixed
+          outputPort: LocationEngine
+    # values:
+    #   Up Vector: "[0.0,1.0,0.0]"
+
+  SensorPlacement:
+   nodeClass: FlexMotion
+   links:
+      LocationEngine:
+        - sourceNode: Waypoint
+          outputPort: LocationEngine
+      OrientationEngine:
+        - sourceNode: LookAt
+          outputPort: OrientationEngine
+
+  Sensor:
+    name: sensor
+    nodeClass: High Resolution EO Platform
+    links:
+      Flex Motion:
+        - sourceNode: SensorPlacement
+          outputPort: Motion
+    values:
+      Detector Clock Rate (Hz): 3.0
+      File Schedule: 'capture'
+
+  Simulate:
+    nodeClass: DIRSIG5
+    links:
+      Sensor:
+        - outputPort: Sensor
+          sourceNode: Sensor
+      Scene:
+        - outputPort: Scene
+          sourceNode: Scene
+    values:
+      Capture Duration (s): 1
+version: 2

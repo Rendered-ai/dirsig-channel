@@ -1,0 +1,37 @@
+
+#---------------------------------------
+# Copyright 2019-2025 DADoES, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License in the root directory in the "LICENSE" file or at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#---------------------------------------
+
+schemas:
+  FixedEphemerisNode:
+    alias: Fixed Ephemeris
+    tooltip: Directly supply static positions of the Sun and Moon.
+    category: Simulators
+    subcategory: Ephemeris
+    color: "#F76902"
+    inputs: 
+    - name: Solar Zenith
+      default: "45"
+    - name: Solar Azimuth
+      default: "90"
+    - name: Lunar Zenith
+      default: "45"
+    - name: Lunar Azimuth
+      default: "270"
+    - name: Lunar Fraction
+      default: "0.5"
+    outputs:
+    - name: Ephemeris

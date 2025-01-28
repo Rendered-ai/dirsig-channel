@@ -1,0 +1,252 @@
+MATERIAL_ENTRY {
+    ID           = 1
+    NAME         = background_1
+    EDITOR_COLOR = 0.4, 0.500008, 0.500008
+    DOUBLE_SIDED = FALSE
+
+    RAD_SOLVER_NAME = Classic
+    RAD_SOLVER {
+        ENABLE_SAMPLED_DIFFUSE = FALSE
+    }
+
+    SURFACE_PROPERTIES {
+
+        EMISSIVITY_PROP_NAME = ClassicEmissivity
+        EMISSIVITY_PROP {
+            FILENAME          = emissivity/background_1.ems
+            SPECULAR_FRACTION = 0
+        }
+    }
+}
+
+MATERIAL_ENTRY {
+    ID           = 2
+    NAME         = background_2
+    EDITOR_COLOR = 0.4, 0.500008, 0.500008
+    DOUBLE_SIDED = FALSE
+
+    RAD_SOLVER_NAME = Classic
+    RAD_SOLVER {
+        ENABLE_SAMPLED_DIFFUSE = FALSE
+    }
+
+    SURFACE_PROPERTIES {
+
+        EMISSIVITY_PROP_NAME = ClassicEmissivity
+        EMISSIVITY_PROP {
+            FILENAME          = emissivity/background_2.ems
+            SPECULAR_FRACTION = 0
+        }
+    }
+}
+
+MATERIAL_ENTRY {
+    ID           = 3
+    NAME         = ideal_mat_1
+    EDITOR_COLOR = 0.4, 0.500008, 0.500008
+    DOUBLE_SIDED = FALSE
+
+    RAD_SOLVER_NAME = Classic
+    RAD_SOLVER {
+        ENABLE_SAMPLED_DIFFUSE = FALSE
+    }
+
+    SURFACE_PROPERTIES {
+
+        EMISSIVITY_PROP_NAME = ClassicEmissivity
+        EMISSIVITY_PROP {
+            FILENAME          = emissivity/ideal_mat_1.ems
+            SPECULAR_FRACTION = 0
+        }
+    }
+}
+
+MATERIAL_ENTRY {
+    ID           = 4
+    NAME         = ideal_mat_2
+    EDITOR_COLOR = 0.4, 0.500008, 0.500008
+    DOUBLE_SIDED = FALSE
+
+    RAD_SOLVER_NAME = Classic
+    RAD_SOLVER {
+        ENABLE_SAMPLED_DIFFUSE = FALSE
+    }
+
+    SURFACE_PROPERTIES {
+
+        EMISSIVITY_PROP_NAME = ClassicEmissivity
+        EMISSIVITY_PROP {
+            FILENAME          = emissivity/ideal_mat_2.ems
+            SPECULAR_FRACTION = 0
+        }
+    }
+}
+
+MATERIAL_ENTRY {
+    ID           = 5
+    NAME         = ideal_mat_3
+    EDITOR_COLOR = 0.4, 0.500008, 0.500008
+    DOUBLE_SIDED = FALSE
+
+    RAD_SOLVER_NAME = Classic
+    RAD_SOLVER {
+        ENABLE_SAMPLED_DIFFUSE = FALSE
+    }
+
+    SURFACE_PROPERTIES {
+
+        EMISSIVITY_PROP_NAME = ClassicEmissivity
+        EMISSIVITY_PROP {
+            FILENAME          = emissivity/ideal_mat_3.ems
+            SPECULAR_FRACTION = 0
+        }
+    }
+}
+
+MATERIAL_ENTRY {
+    ID           = 6
+    NAME         = ideal_mat_4
+    EDITOR_COLOR = 0.4, 0.500008, 0.500008
+    DOUBLE_SIDED = FALSE
+
+    RAD_SOLVER_NAME = Classic
+    RAD_SOLVER {
+        ENABLE_SAMPLED_DIFFUSE = FALSE
+    }
+
+    SURFACE_PROPERTIES {
+
+        EMISSIVITY_PROP_NAME = ClassicEmissivity
+        EMISSIVITY_PROP {
+            FILENAME          = emissivity/ideal_mat_4.ems
+            SPECULAR_FRACTION = 0
+        }
+    }
+}
+
+MATERIAL_ENTRY {
+    ID           = 7
+    NAME         = ideal_mat_5
+    EDITOR_COLOR = 0.4, 0.500008, 0.500008
+    DOUBLE_SIDED = FALSE
+
+    RAD_SOLVER_NAME = Classic
+    RAD_SOLVER {
+        ENABLE_SAMPLED_DIFFUSE = FALSE
+    }
+
+    SURFACE_PROPERTIES {
+
+        EMISSIVITY_PROP_NAME = ClassicEmissivity
+        EMISSIVITY_PROP {
+            FILENAME          = emissivity/ideal_mat_5.ems
+            SPECULAR_FRACTION = 0
+        }
+    }
+}
+
+MATERIAL_ENTRY {
+    ID           = 8
+    NAME         = ideal_mat_6
+    EDITOR_COLOR = 0.4, 0.500008, 0.500008
+    DOUBLE_SIDED = FALSE
+
+    RAD_SOLVER_NAME = Classic
+    RAD_SOLVER {
+        ENABLE_SAMPLED_DIFFUSE = FALSE
+    }
+
+    SURFACE_PROPERTIES {
+
+        EMISSIVITY_PROP_NAME = ClassicEmissivity
+        EMISSIVITY_PROP {
+            FILENAME          = emissivity/ideal_mat_6.ems
+            SPECULAR_FRACTION = 0
+        }
+    }
+}
+
+MATERIAL_ENTRY {
+    ID           = 9
+    NAME         = ideal_mat_7
+    EDITOR_COLOR = 0.4, 0.500008, 0.500008
+    DOUBLE_SIDED = FALSE
+
+    RAD_SOLVER_NAME = Classic
+    RAD_SOLVER {
+        ENABLE_SAMPLED_DIFFUSE = FALSE
+    }
+
+    SURFACE_PROPERTIES {
+
+        EMISSIVITY_PROP_NAME = ClassicEmissivity
+        EMISSIVITY_PROP {
+            FILENAME          = emissivity/ideal_mat_7.ems
+            SPECULAR_FRACTION = 0
+        }
+    }
+}
+
+MATERIAL_ENTRY {
+    ID           = 10
+    NAME         = ideal_mat_8
+    EDITOR_COLOR = 0.4, 0.500008, 0.500008
+    DOUBLE_SIDED = FALSE
+
+    RAD_SOLVER_NAME = Classic
+    RAD_SOLVER {
+        ENABLE_SAMPLED_DIFFUSE = FALSE
+    }
+
+    SURFACE_PROPERTIES {
+
+        EMISSIVITY_PROP_NAME = ClassicEmissivity
+        EMISSIVITY_PROP {
+            FILENAME          = emissivity/ideal_mat_8.ems
+            SPECULAR_FRACTION = 0
+        }
+    }
+}
+
+MATERIAL_ENTRY {
+    ID           = 11
+    NAME         = ideal_mat_9
+    EDITOR_COLOR = 0.4, 0.500008, 0.500008
+    DOUBLE_SIDED = FALSE
+
+    RAD_SOLVER_NAME = Classic
+    RAD_SOLVER {
+        ENABLE_SAMPLED_DIFFUSE = FALSE
+    }
+
+    SURFACE_PROPERTIES {
+
+        EMISSIVITY_PROP_NAME = ClassicEmissivity
+        EMISSIVITY_PROP {
+            FILENAME          = emissivity/ideal_mat_9.ems
+            SPECULAR_FRACTION = 0
+        }
+    }
+}
+
+MATERIAL_ENTRY {
+    ID           = 12
+    NAME         = ideal_mat_10
+    EDITOR_COLOR = 0.4, 0.500008, 0.500008
+    DOUBLE_SIDED = FALSE
+
+    RAD_SOLVER_NAME = Classic
+    RAD_SOLVER {
+        ENABLE_SAMPLED_DIFFUSE = FALSE
+    }
+
+    SURFACE_PROPERTIES {
+
+        EMISSIVITY_PROP_NAME = ClassicEmissivity
+        EMISSIVITY_PROP {
+            FILENAME          = emissivity/ideal_mat_10.ems
+            SPECULAR_FRACTION = 0
+        }
+    }
+}
+
