@@ -18,7 +18,7 @@ that can be used for AI/ML training, validation, and testing.
 For more information on the Rendered.ai platform and why synthetic data is important for AI, visit 
 [the Rendered.ai support pages](https://support.rendered.ai/).
 
-The source code and files in this repository are copyright 2019-2022 DADoES, Inc. and licensed under the Apache 2.0
+The source code and files in this repository are copyright 2019-2025 DADoES, Inc. and licensed under the Apache 2.0
 license which is located at the root level of this repository: [LICENSE](LICENSE).
 
 ## Setup
