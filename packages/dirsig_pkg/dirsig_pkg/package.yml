@@ -1,6 +1,6 @@
 #For prod
 volumes:
-  dirsig-shared: 'da879e27-9ac6-4fc4-b178-aad21dc0cf0b' # Rendered.ai dirsig-shared (Desert Highway v2, Sierra Nevada, LWIR_Urban_Alt, Bundle Inventory)
+  dirsig-shared: 'bfd50714-b066-472e-9bda-ab1b64b6ba44' # DIRSIG Shared Workspace Volume (Desert Highway v2, Sierra Nevada, LWIR_Urban_Alt, Bundle Inventory)
 
 # Define objects.
 objects:

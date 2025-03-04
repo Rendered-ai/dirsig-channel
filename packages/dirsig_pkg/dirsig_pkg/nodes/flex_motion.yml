@@ -28,7 +28,6 @@ schemas:
       validation:
         oneOf:
           - type: number
-            minimum: 0.0
           - numLinks: one
     - name: Entry
       default: "[0.0,0.0,0.0]"
