@@ -85,6 +85,7 @@ class AnaDirsigObject(AnaBaseObject):
         self._size = []
         self.name = "{}_{}".format(self.object_type.replace(" ", ""), self.instance)
         self.match_slope = False
+        self.match_elevation = True
     
     def __repr__(self):
         if self.loaded:
@@ -107,7 +108,7 @@ class AnaDirsigObject(AnaBaseObject):
         if "config" in kwargs:
             self.config = kwargs.pop("config")
     
-    def move(self, trans_vector=[0,0,0], rot_vector=[0,0,0], match_slope=False):
+    def move(self, trans_vector=[0,0,0], rot_vector=[0,0,0], match_slope=False, match_elevation=True):
         # Update the translation by a vector (meters) of 3 floats
         # Update the rotation by a vector (degrees) of 3 floats
         assert all([isinstance(x, (float, int)) for x in trans_vector])
@@ -117,19 +118,7 @@ class AnaDirsigObject(AnaBaseObject):
             objInstance.set_rotation([objInstance.get_rotation()[i]+rot_vector[i] for i in range(3)])
         
         self.match_slope = match_slope
-
-    def scale(self, scale_factors):
-        # Update the scale factors if all this glist object's instances by the input array of 3 floats
-        assert all([isinstance(x, (float, int)) for x in scale_factors])
-        for objInstance in self.root.get_instances():
-            objInstance.set_scale([objInstance.get_scale()[i]*scale_factors[i] for i in range(3)])
-        
-        #Collect metadata
-        self.modifiers.append({
-            "Scale_N": {
-                "Scale Factors": scale_factors
-            }
-        })
+        self.match_elevation = match_elevation
     
     def get_size(self):
         # Return the dimensions of the raw OBJ
@@ -169,7 +158,7 @@ class AnaDirsigObject(AnaBaseObject):
         # Set this object to have a DIRSIG Dynamic Instance
         if name == None:
             name = self.name
-        self.root._instance = []
+        self.root._instance = [] # remove any static instances
         dynamicInstance = glist.DynamicInstance(
             name=self.name,
             motion=motion

@@ -15,23 +15,24 @@
 # limitations under the License.
 #---------------------------------------
 
-import pdb
+# Spatial sampling uility functions for generating and manipulating spatial distributions.
+# These utilities support object placement in scenes with controlled randomness.
+
 import logging
 from pathlib import Path
 import numpy as np
-from dirsig_pkg.lib.cluster import Cluster
+from dirfm import glist
 from shapely.affinity import affine_transform
 from shapely.geometry import Point, Polygon
 from shapely.ops import triangulate
-from anatools.lib.generator import Generator, CreateBranchGenerator
-import anatools.lib.context as ctx
 import random
+import anatools.lib.context as ctx
 
 logger = logging.getLogger(__name__)
 
 def random_points_in_polygon(polygon, k):
     """
-    Return list of k points chosen uniformly at random inside the polygon.
+    Return list of k points in 2 dimensions chosen uniformly at random inside the polygon.
     Source: https://codereview.stackexchange.com/questions/69833/generate-sample-coordinates-inside-a-polygon
     """
     areas = []
@@ -64,29 +65,3 @@ def hexagon(location=(0,0), radius=1):
         vertices.append((x, y))
 
     return Polygon(vertices)
-
-
-class RandomClusterGenerator(Generator):
-    """ Random Cluster Generator """
-
-    def exec(self):
-
-        # create an object
-        child = self.select_child()
-        anaObject = child.exec()
-
-        #Add a cluster to the object
-        center = self.kwargs.get("center", (0,0))
-        radius = self.kwargs.get("radius", 1.0)
-        n_objects = self.kwargs.get("n_objects", 1)
-        poly = hexagon(center, radius)
-        locations = random_points_in_polygon(poly, n_objects)
-        
-        #Create a cluster 
-        cluster = Cluster("Random Cluster", locations)
-
-        #Setting static binary instance
-        anaObject.set_binfile_instance(cluster.locations_filepath)
-        anaObject.root.set_tag(anaObject.name)
-
-        return anaObject

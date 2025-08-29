@@ -1,0 +1,27 @@
+schemas:
+  ClusterObjects:
+    tooltip: Place an bunch of objects near a specific location
+    help: dirsig_pkg/instance_modifiers/cluster_objects.md
+    category: Scenes
+    subcategory: Object Modifiers
+    color: '#3A4928'
+    inputs: 
+    - name: Objects
+      description: Objects to place
+      validation:
+        numLinks: oneOrMany
+    - name: Scene Location (m, m)
+      description: Location in scene coordinates to place the object
+      default: "[0, 0]"
+      validation:
+        oneOf:
+          - type: array
+          - numLinks: one
+    - name: Number of Objects
+      description: How many object to place
+      default: 1
+    - name: Radius (m)
+      description: Extent of cluster
+      default: 1.0
+    outputs:
+    - name: Objects

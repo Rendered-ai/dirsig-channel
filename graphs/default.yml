@@ -1,8 +1,13 @@
 nodes:
   Object_Bench:
     nodeClass: Bench
+    links: {}
+    values: {}
+
   Object_Table:
     nodeClass: Picnic Table
+    links: {}
+    values: {}
 
   Pose_Table:
     nodeClass: PoseObjects
@@ -11,8 +16,8 @@ nodes:
         - sourceNode: Object_Table
           outputPort: Picnic Table Object
     values:
-      Translation (m): "[0,90,4]"
-  
+      Translation (m): '[0,90,0]'
+
   Cluster_Benches:
     nodeClass: ClusterObjects
     links:
@@ -22,7 +27,7 @@ nodes:
     values:
       Number of Objects: 10
       Radius (m): 10
-      Scene Location (m, m): "[-10, 80]"
+      Scene Location (m, m): '[-10, 80]'
 
   Scene0:
     nodeClass: Desert Highway
@@ -32,12 +37,14 @@ nodes:
           outputPort: Objects
         - sourceNode: Pose_Table
           outputPort: Objects
-  
+    values: {}
+
   Position_DroneLocation:
     nodeClass: TimeEntry
+    links: {}
     values:
-      Time: 0.0
-      Entry: "[0,20,50]"
+      Time: 0
+      Entry: '[0,20,50]'
 
   Waypoint_DroneLocation:
     nodeClass: WaypointLocationEngine
@@ -45,12 +52,14 @@ nodes:
       Position(s):
         - sourceNode: Position_DroneLocation
           outputPort: Entry
+    values: {}
 
   Position_LookAt:
     nodeClass: TimeEntry
+    links: {}
     values:
-      Time: 0.0
-      Entry: "[0,90,10]"
+      Time: 0
+      Entry: '[0,90,10]'
 
   Waypoint_LookAt:
     nodeClass: WaypointLocationEngine
@@ -58,6 +67,7 @@ nodes:
       Position(s):
         - sourceNode: Position_LookAt
           outputPort: Entry
+    values: {}
 
   LookAt:
     nodeClass: LookAtOrientationEngine
@@ -65,16 +75,18 @@ nodes:
       LocationEngine:
         - sourceNode: Waypoint_LookAt
           outputPort: LocationEngine
+    values: {}
 
   SensorPlacement:
-   nodeClass: FlexMotion
-   links:
+    nodeClass: FlexMotion
+    links:
       LocationEngine:
         - sourceNode: Waypoint_DroneLocation
           outputPort: LocationEngine
       OrientationEngine:
         - sourceNode: LookAt
           outputPort: OrientationEngine
+    values: {}
 
   Sensor0:
     nodeClass: Drone
@@ -82,6 +94,7 @@ nodes:
       Flex Motion:
         - sourceNode: SensorPlacement
           outputPort: Motion
+    values: {}
 
   Simulate:
     nodeClass: DIRSIG5
@@ -92,4 +105,6 @@ nodes:
       Scene:
         - sourceNode: Scene0
           outputPort: Scene
+    values: {}
+
 version: 2

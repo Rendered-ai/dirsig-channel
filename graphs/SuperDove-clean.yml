@@ -1,0 +1,133 @@
+nodes:
+  DIRSIG5:
+    nodeClass: DIRSIG5
+    links:
+      Scene:
+        - outputPort: Scene
+          sourceNode: Desert Highway
+      Sensor:
+        - outputPort: Sensor
+          sourceNode: Low Resolution EO Platform
+    values:
+      Capture Duration (s): 0
+      Ephemeris: Simple Solar Ephemeris
+      Reference Datetime: 2023-06-03T12:30
+
+  Desert Highway:
+    nodeClass: Desert Highway
+    links:
+      Objects:
+        - outputPort: Objects
+          sourceNode: PoseObjects
+    values: {}
+
+  FlexMotion:
+    nodeClass: FlexMotion
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: SensorWaypointLocation
+      OrientationEngine:
+        - outputPort: OrientationEngine
+          sourceNode: LookAtOrientationEngine
+    values: {}
+
+  LookAtOrientationEngine:
+    nodeClass: LookAtOrientationEngine
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: TargetWaypointLocation
+    values:
+      Up Vector: '[0.0,0.0,1.0]'
+
+  Low Resolution EO Platform:
+    nodeClass: Low Resolution EO Platform
+    links:
+      Flex Motion:
+        - outputPort: Motion
+          sourceNode: FlexMotion
+    values:
+      Collect Geolocation: F
+      Collect Intersection: T
+      Collect Shadow: F
+      Detector Clock Rate (Hz): '30.0'
+      File Schedule: simulation
+
+  PoseObjects:
+    nodeClass: PoseObjects
+    links:
+      Objects:
+        - outputPort: Objects
+          sourceNode: ScaleObjects
+    values:
+      Match Elevation: 'False'
+      Match Slope: 'True'
+      Rotation (deg): '[0,0,90]'
+      Translation (m): '[0,0,5]'
+
+  ScaleObjects:
+    nodeClass: ScaleObjects
+    links:
+      Objects:
+        - outputPort: Tri-bar Object
+          sourceNode: Tri-bar Target
+    values:
+      Scale Factors: '[100, 100, 1]'
+
+  SensorPosition:
+    nodeClass: TimeEntry
+    links: {}
+    values:
+      Entry: '[0,0,300000]'
+      Time: 0
+
+  SensorPosition2:
+    nodeClass: TimeEntry
+    links: {}
+    values:
+      Entry: '[7600,0,300000]'
+      Time: 1
+
+  TargetPosition:
+    nodeClass: TimeEntry
+    links: {}
+    values:
+      Entry: '[0,0,0]'
+      Time: 0
+
+  TargetPosition2:
+    nodeClass: TimeEntry
+    links: {}
+    values:
+      Entry: '[5000,0,0]'
+      Time: 1
+
+  Tri-bar Target:
+    nodeClass: Tri-bar Target
+    links: {}
+    values: {}
+
+  TargetWaypointLocation:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - outputPort: Entry
+          sourceNode: TargetPosition
+        - outputPort: Entry
+          sourceNode: TargetPosition2
+    values:
+      Frame: scene
+
+  SensorWaypointLocation:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - outputPort: Entry
+          sourceNode: SensorPosition
+        - outputPort: Entry
+          sourceNode: SensorPosition2
+    values:
+      Frame: scene
+
+version: 2

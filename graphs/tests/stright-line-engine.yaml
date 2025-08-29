@@ -1,0 +1,430 @@
+nodes:
+  DIRSIG5_14:
+    alias: DIRSIG5
+    color: '#F76902'
+    hash: 711be691fee6711276d56ce80665ac28f1a42800
+    links:
+      Scene:
+        - outputPort: Scene
+          sourceNode: Desert Highway_4
+      Sensor:
+        - outputPort: Sensor
+          sourceNode: Medium Resolution EO Platform_13
+    location:
+      x: 4206.1392822265625
+      'y': 800.0354295210404
+    name: DIRSIG5_14
+    nodeClass: DIRSIG5
+    ports:
+      inputs:
+        - description: ''
+          name: Sensor
+        - description: ''
+          name: Scene
+        - default: 2023-06-03T12:30
+          name: Reference Datetime
+        - default: 0
+          description: Set the flight time
+          name: Capture Duration (s)
+        - default: Simple Solar Ephemeris
+          description: Set the ephemeris plugin
+          name: Ephemeris
+      outputs: []
+    tooltip: Simulate dirsig tasks and create associated truth and metadata
+    values:
+      Capture Duration (s): '0.04'
+      Ephemeris: Simple Solar Ephemeris
+      Reference Datetime: 2023-06-03T13:30
+  Desert Highway_4:
+    alias: Desert Highway
+    color: '#3A4928'
+    hash: e03e999ea13482fcbf95c8239a4ee88a5fd26295
+    links:
+      Objects:
+        - outputPort: Objects
+          sourceNode: PoseObjects_3
+    location:
+      x: 3435.045554421165
+      'y': 1378.590904929421
+    name: Desert Highway_4
+    nodeClass: Desert Highway
+    ports:
+      inputs:
+        - default: null
+          name: Objects
+      outputs:
+        - name: Scene
+    tooltip: High resolution scene 6km X 6km.
+    values: {}
+  FlexMotion_12:
+    color: '#99D2D2'
+    hash: 1397f7f8b92d6ff02567a744ee72b467fe8821e2
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: WaypointLocationEngine_7
+      OrientationEngine:
+        - outputPort: OrientationEngine
+          sourceNode: LookAtOrientationEngine_18
+    location:
+      x: 2670.590986772017
+      'y': 573.6818181818181
+    name: FlexMotion_12
+    nodeClass: FlexMotion
+    ports:
+      inputs:
+        - description: >-
+            Any location engine will work. If none are provided then the sensor
+            will be placed at the origin.
+          name: LocationEngine
+          validation:
+            numLinks: zeroOrOne
+        - description: >-
+            Any orientation engine will work. If none are provided then the
+            sensor will "look at" the origin.
+          name: OrientationEngine
+          validation:
+            numLinks: zeroOrOne
+      outputs:
+        - description: A complete FlexMotion object
+          name: Motion
+    tooltip: Controls the position and orientation of an object in the scene.
+    values: {}
+  LookAtOrientationEngine_18:
+    color: '#99D2D2'
+    hash: 679c10efdb0f2452e3144f28f93572e4501a0b06
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: StraightLineLocationEngine_19
+    location:
+      x: 1891.2538227708424
+      'y': 821.326355274859
+    name: LookAtOrientationEngine_18
+    nodeClass: LookAtOrientationEngine
+    ports:
+      inputs:
+        - description: Any location engine can be used here.
+          name: LocationEngine
+          validation:
+            numLinks: one
+        - default: '[0.0,0.0,1.0]'
+          description: Defines up-vector of focal plane.
+          name: Up Vector
+          validation:
+            oneOf:
+              - items:
+                  type: number
+                maxItems: 3
+                minItems: 3
+                type: array
+              - numLinks: one
+      outputs:
+        - description: A complete OrientationEngine object.
+          name: OrientationEngine
+    tooltip: >-
+      Allows the user to focus on a specific point or object in the scene
+      without specifying rotation angles.
+    values:
+      Up Vector: '[0.0,0.0,1.0]'
+  Medium Resolution EO Platform_13:
+    alias: Medium Resolution EO Platform
+    color: '#D4BF88'
+    hash: fe261f2b7c29f93e2495b6b6c32ebcb1678a7561
+    links:
+      Flex Motion:
+        - outputPort: Motion
+          sourceNode: FlexMotion_12
+    location:
+      x: 3435.045554421165
+      'y': 574.3389226740056
+    name: Medium Resolution EO Platform_13
+    nodeClass: Medium Resolution EO Platform
+    ports:
+      inputs:
+        - default: T
+          name: Collect Intersection
+          select:
+            - T
+            - F
+          validation:
+            type: string
+        - default: F
+          name: Collect Geolocation
+          select:
+            - T
+            - F
+          validation:
+            type: string
+        - name: Flex Motion
+          validation:
+            numLinks: one
+        - default: simulation
+          name: File Schedule
+          select:
+            - simulation
+            - capture
+            - task
+        - default: '30.0'
+          name: Detector Clock Rate (Hz)
+          validation:
+            type: float
+      outputs:
+        - name: Sensor
+    tooltip: WorldView 3 VIS+NIR
+    values:
+      Collect Geolocation: T
+      Collect Intersection: T
+      Detector Clock Rate (Hz): '100'
+      File Schedule: capture
+  PoseObjects_3:
+    color: '#3A4928'
+    hash: af5153dc5bd1076cb9e08644c8cf3de6bb01281c
+    links:
+      Objects:
+        - outputPort: Objects
+          sourceNode: ScaleObjects_2
+    location:
+      x: 2533.728437943892
+      'y': 1310.964684226296
+    name: PoseObjects_3
+    nodeClass: PoseObjects
+    ports:
+      inputs:
+        - description: ''
+          name: Objects
+        - default: '[0,0,5]'
+          description: ''
+          name: Translation (m)
+          value: '[0,0,5]'
+        - default: '[0,0,90]'
+          description: ''
+          name: Rotation (deg)
+          value: '[0,0,90]'
+        - default: 'True'
+          description: ''
+          name: Match Slope
+          select:
+            - 'True'
+            - 'False'
+          value: 'True'
+      outputs:
+        - description: ''
+          name: Objects
+    tooltip: Explicitly set an object's location and orientation
+    values:
+      Match Slope: 'True'
+      Rotation (deg): '[0,0,90]'
+      Translation (m): '[0,0,5]'
+  ScaleObjects_2:
+    color: '#3A4928'
+    hash: dd7e7d033e86e57121550cbfbac672f9b3273e54
+    links:
+      Objects:
+        - outputPort: Tri-bar Object
+          sourceNode: Tri-bar Target_1
+    location:
+      x: 1904.8556574041195
+      'y': 1378.590904929421
+    name: ScaleObjects_2
+    nodeClass: ScaleObjects
+    ports:
+      inputs:
+        - description: ''
+          name: Objects
+        - default: '[100, 100, 1]'
+          description: ''
+          name: Scale Factors
+          value: '[100, 100, 1]'
+      outputs:
+        - description: ''
+          name: Objects
+    tooltip: Scale the object's size by XYZ multiplicative factors
+    values:
+      Scale Factors: '[10, 10, 1]'
+  StraightLineLocationEngine_19:
+    color: '#99D2D2'
+    hash: 1a57c5adc5e657a40d6cedcc278a8915778caf1b
+    links: {}
+    location:
+      x: 1193.645594457998
+      'y': 884.2683516804466
+    name: StraightLineLocationEngine_19
+    nodeClass: StraightLineLocationEngine
+    ports:
+      inputs:
+        - default: '[0.0,0.0,0.0]'
+          description: Starting location (meters) relative to the origin.
+          name: Position
+          validation:
+            oneOf:
+              - items:
+                  type: number
+                maxItems: 3
+                minItems: 3
+                type: array
+              - numLinks: one
+        - default: '10.0'
+          description: Rate at which to move (meters/second).
+          name: Speed
+          validation:
+            oneOf:
+              - minimum: 0
+                type: number
+              - numLinks: one
+        - default: '0.0'
+          description: Direction in which to move (degrees).
+          name: Heading
+          validation:
+            oneOf:
+              - type: number
+              - numLinks: one
+        - default: scene
+          description: >-
+            scene for East-North-Up coordinates, geodetic for Lat-Lon-Alt
+            coordinate, ecef for Earth-Centered-Earth-Fixed coordinates.
+          name: Frame
+          select:
+            - scene
+            - geodetic
+            - ecef
+      outputs:
+        - description: A complete LocationEngine object.
+          name: LocationEngine
+    tooltip: >-
+      Defines an object moving in a straight line (constant altitude, constant
+      speed).
+    values:
+      Frame: scene
+      Heading: '0.0'
+      Position: '[-150,-175,0.0]'
+      Speed: '7500.0'
+  TimeEntry_5:
+    color: '#99D2D2'
+    hash: 384cd1d034b6d0e9fb4b96f0b1efd8fc09e0564e
+    links: {}
+    location:
+      x: 1144.549649325284
+      'y': 190.48389504172587
+    name: TimeEntry_5
+    nodeClass: TimeEntry
+    ports:
+      inputs:
+        - default: '0.0'
+          description: Realtive time (seconds) from beginning of simulation.
+          name: Time
+          validation:
+            oneOf:
+              - type: number
+              - numLinks: one
+        - default: '[0.0,0.0,0.0]'
+          description: >-
+            Location (meters) relative to the origin, or rotation angles
+            (degrees).
+          name: Entry
+          validation:
+            oneOf:
+              - items:
+                  type: number
+                maxItems: 3
+                minItems: 3
+                type: array
+              - numLinks: one
+      outputs:
+        - description: A timestamped entry.
+          name: Entry
+    tooltip: Specifies an entry at one time step.
+    values:
+      Entry: '[0,-175,300000]'
+      Time: 0
+  TimeEntry_6:
+    color: '#99D2D2'
+    hash: 384cd1d034b6d0e9fb4b96f0b1efd8fc09e0564e
+    links: {}
+    location:
+      x: 1145.9611483487215
+      'y': 571.3989812677557
+    name: TimeEntry_6
+    nodeClass: TimeEntry
+    ports:
+      inputs:
+        - default: '0.0'
+          description: Realtive time (seconds) from beginning of simulation.
+          name: Time
+          validation:
+            oneOf:
+              - type: number
+              - numLinks: one
+        - default: '[0.0,0.0,0.0]'
+          description: >-
+            Location (meters) relative to the origin, or rotation angles
+            (degrees).
+          name: Entry
+          validation:
+            oneOf:
+              - items:
+                  type: number
+                maxItems: 3
+                minItems: 3
+                type: array
+              - numLinks: one
+      outputs:
+        - description: A timestamped entry.
+          name: Entry
+    tooltip: Specifies an entry at one time step.
+    values:
+      Entry: '[0,200,300000]'
+      Time: '0.005'
+  Tri-bar Target_1:
+    alias: Tri-bar Target
+    color: '#3A4928'
+    hash: f1b5aba9f22f5b5e7fb76bf34f3c39155cc7d433
+    links: {}
+    location:
+      x: 1141.6818514737215
+      'y': 1378.590904929421
+    name: Tri-bar Target_1
+    nodeClass: Tri-bar Target
+    ports:
+      inputs: []
+      outputs:
+        - description: Object generator
+          name: Tri-bar Object
+    tooltip: Air Force bar target, 1m x 1m
+    values: {}
+  WaypointLocationEngine_7:
+    color: '#99D2D2'
+    hash: 0ea1541f8f3687228acc10799173db809e5ee5ea
+    links:
+      Position(s):
+        - outputPort: Entry
+          sourceNode: TimeEntry_5
+        - outputPort: Entry
+          sourceNode: TimeEntry_6
+    location:
+      x: 1906.1364191228695
+      'y': 381.9545454545455
+    name: WaypointLocationEngine_7
+    nodeClass: WaypointLocationEngine
+    ports:
+      inputs:
+        - description: ''
+          name: Position(s)
+        - default: scene
+          description: >-
+            scene for East-North-Up coordinates, geodetic for Lat-Lon-Alt
+            coordinate, ecef for Earth-Centered-Earth-Fixed coordinates.
+          name: Frame
+          select:
+            - scene
+            - geodetic
+            - ecef
+      outputs:
+        - description: ''
+          name: LocationEngine
+    tooltip: >-
+      Lets user supply a set of waypoints to drive object motion as a function
+      of time.
+    values:
+      Frame: scene
+version: 2

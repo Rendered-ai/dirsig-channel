@@ -1,0 +1,18 @@
+schemas:
+  ScaleObjects:
+    tooltip: Scale the object's size by XYZ multiplicative factors
+    help: dirsig_pkg/instance_modifiers/scale_objects.md
+    category: Scenes
+    subcategory: Object Modifiers
+    color: '#3A4928'
+    inputs:
+    - name: Objects
+      description: One or more objects to scale
+      validation:
+        numLinks: oneOrMany
+    - name: Scale Factors
+      description: Multiplicative factors to stretch or shrink the object
+      default: "[1.0, 1.0, 1.0]"
+    outputs:
+    - name: Objects
+      description: Scaled input objects

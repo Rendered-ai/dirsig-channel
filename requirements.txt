@@ -1,8 +1,10 @@
 spectral
 lxml
 scipy==1.11.4
+numpy==1.26
 anatools>=3.6
 opencv-python
 shapely
+pygltflib
 -e ./packages/dirfm
 -e ./packages/dirsig_pkg

@@ -2,6 +2,6 @@
  
  224 channel system;
  
- When flown at 20 km like on a U2, the resolution is ~20m GSD;
+ When flown at 20 km like on an ER-2 jet, the resolution is ~20m GSD;
  
- When flown at 4 km like on  a Twin Otter, the resolution is ~4m GSD.
+ When flown at 4 km like on  a Twin Otter arircraft, the resolution is ~4m GSD.

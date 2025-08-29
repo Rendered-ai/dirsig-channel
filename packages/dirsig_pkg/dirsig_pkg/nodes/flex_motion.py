@@ -15,9 +15,9 @@
 # limitations under the License.
 #---------------------------------------
 
-import ast
 import logging
 from anatools.lib.node import Node
+from dirsig_pkg.lib.utils import array_input
 
 import dirfm.flexible_motion as fm
 
@@ -30,7 +30,7 @@ class TimeEntry(Node):
         logger.info("Executing {}".format(self.name))
 
         time = float(self.inputs["Time"][0])
-        entry = ast.literal_eval(self.inputs["Entry"][0])
+        entry = array_input(self.inputs["Entry"][0])
 
         return {"Entry": (time,entry)} 
 
@@ -55,7 +55,7 @@ class StraightLineLocationEngine(Node):
     def exec(self):
         logger.info("Executing {}".format(self.name))
         # order of entries doesn't matter as they are sorted inside WaypointsLocationEngine
-        pos = ast.literal_eval(self.inputs["Position"][0])
+        pos = array_input(self.inputs["Position"][0])
         heading =float(self.inputs['Heading'][0])
         velocity=float(self.inputs['Speed'][0])
         frame = self.inputs["Frame"][0]
@@ -66,7 +66,7 @@ class StraightLineLocationEngine(Node):
         elif frame=="geodetic":
            p = fm.GeodeticFrame(pos[0],pos[1],pos[2])
 
-        le = fm.StraightLightLocationEngine(p,heading,velocity)
+        le = fm.StraightLocationEngine(p,heading,velocity)
 
         return {"LocationEngine": le}
 
@@ -75,7 +75,7 @@ class FixedLocationEngine(Node):
     def exec(self):
         logger.info("Executing {}".format(self.name))
         # order of entries doesn't matter as they are sorted inside WaypointsLocationEngine
-        pos = ast.literal_eval(self.inputs["Position"][0])
+        pos = array_input(self.inputs["Position"][0])
         frame = self.inputs["Frame"][0]
         if frame=="scene":
            p = fm.ENUFrame(pos[0],pos[1],pos[2])
@@ -121,7 +121,7 @@ class LookAtOrientationEngine(Node):
     def exec(self):
         logger.info("Executing {}".format(self.name))
         # order of entries doesn't matter as they are sorted inside WaypointsLocationEngine
-        up = ast.literal_eval(self.inputs["Up Vector"][0])
+        up = array_input(self.inputs["Up Vector"][0])
         oe = fm.LookAtOrientationEngine(self.inputs["LocationEngine"][0],up=up)
 
         return {"OrientationEngine": oe}
@@ -141,12 +141,12 @@ class FlexMotion(Node):
     def exec(self):
         logger.info("Executing {}".format(self.name))
 
-        if len(self.inputs["LocationEngine"])==1:
+        if self.inputs["LocationEngine"][0]: # Not None or empty string
             le = self.inputs["LocationEngine"][0]
         else:
             le = fm.FixedLocationEngine(fm.ENUFrame(0,0,0))
 
-        if len(self.inputs["OrientationEngine"])==1:
+        if self.inputs["OrientationEngine"][0]: # Not None or empty string
             oe = self.inputs["OrientationEngine"][0]
         else:
             oe = fm.LookAtOrientationEngine(

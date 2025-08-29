@@ -29,7 +29,7 @@ from dirfm.ephemeris import EphemerisPlugin
 from dirfm import TASKS
 from dirfm.dirsig import DIRSIG
 from dirfm.utilities.annotations import AnnotationsMetadata
-from dirsig_pkg.lib.mask import create_mask
+from dirsig_pkg.lib.mask import mask_to_annotation
 from spectral import open_image
 
 logger = logging.getLogger(__name__)
@@ -149,13 +149,12 @@ class Simulate(Node):
                             for idx, band in enumerate(bands):
                                 if "Abundance" not in band:
                                     continue
-                                try:
-                                    name = band.split("\'")[1]
-                                    t = name.split("_")[0]
-                                    mask = create_mask(img_data.read_band(idx))
-                                    anno.add_entry(name=band.split("\'")[1],type=t, **mask)
-                                except:
-                                    logger.info("File [{}] contains band [{}] that couldn't be masked".format(Path(img_data.filename).name,band))
+                                name = band.split("\'")[1]
+                                objectType = "_".join([tok for tok in name.split("_") if not tok.isdigit()])
+                                mask = img_data.read_band(idx)
+                                annotation = mask_to_annotation(mask)
+                                if annotation["bbox"]:
+                                    anno.add_entry(name=name, type=objectType, **annotation)
 
                             anno_dir = Path(ctx.output) / "annotations"
                             meta_dir = Path(ctx.output) / "metadata"
@@ -164,7 +163,7 @@ class Simulate(Node):
                             if not meta_dir.exists():
                                 os.makedirs(meta_dir)
                             anno.write(
-                                anno_dir / f"{enviFileName.split('.')[0]}-annotations.json",
+                                anno_dir / f"{enviFileName.split('.')[0]}-ana.json",
                                 meta_dir / f"{enviFileName.split('.')[0]}-metadata.json",
                             )
 

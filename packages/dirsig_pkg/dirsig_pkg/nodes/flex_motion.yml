@@ -18,6 +18,7 @@
 schemas:
   TimeEntry:
     tooltip: Specifies an entry at one time step.
+    help: dirsig_pkg/motion/time_entry.md
     category: Motion
     color: "#99D2D2"
     subcategory: Common
@@ -49,6 +50,7 @@ schemas:
     color: "#99D2D2"
     subcategory: Location Engines
     tooltip: Lets user supply a set of waypoints to drive object motion as a function of time.
+    help: dirsig_pkg/motion/waypoint_location_engine.md
     inputs:
     - name: Position(s)
       description: One or more TimeEntries.
@@ -65,6 +67,7 @@ schemas:
   StraightLineLocationEngine:
     category: Motion
     tooltip: Defines an object moving in a straight line (constant altitude, constant speed).
+    help: dirsig_pkg/motion/straight_line_location_engine.md
     color: "#99D2D2"
     subcategory: Location Engines
     inputs:
@@ -105,6 +108,7 @@ schemas:
   FixedLocationEngine:
     category: Motion
     tooltip: The desired object will not move as a function of time.
+    help: dirsig_pkg/motion/fixed_location_engine.md
     color: "#99D2D2"
     subcategory: Location Engines
     inputs:
@@ -131,7 +135,7 @@ schemas:
     category: Motion
     color: "#99D2D2"
     tooltip: Allows the user to specify orientation using the objects direction of motion.
-    help: dirsig_pkg/nodes/velocity_orientation.md
+    help: dirsig_pkg/motion/velocity_orientation_engine.md
     subcategory: Orientation Engines
     inputs:
     - name: Frame
@@ -146,10 +150,11 @@ schemas:
     category: Motion
     color: "#99D2D2"
     tooltip: Allows the user to specify orientation using Euler angles as a function fo time.
+    help: dirsig_pkg/motion/euler_orientation_engine.md
     subcategory: Orientation Engines
     inputs:
     - name: Orientation(s)
-      description: One or more TimeEntries where each represents a time dependent orientation.
+      description: One or more TimeEntries where each represents a time dependent vector in radians.
       validation:
         numLinks: oneOrMany
     - name: Rotation Order
@@ -168,6 +173,7 @@ schemas:
     category: Motion
     color: "#99D2D2"
     tooltip: Allows the user to focus on a specific point or object in the scene without specifying rotation angles.
+    help: dirsig_pkg/motion/look_at_orientation_engine.md
     subcategory: Orientation Engines
     inputs:
     - name: LocationEngine
@@ -196,10 +202,12 @@ schemas:
       description: Any location engine will work. If none are provided then the sensor will be placed at the origin.
       validation:
         numLinks: zeroOrOne
+        default: null
     - name: OrientationEngine
       description: Any orientation engine will work. If none are provided then the sensor will "look at" the origin.
       validation:
         numLinks: zeroOrOne
+        default: null
     outputs:
     - name: Motion
       description: A complete FlexMotion object

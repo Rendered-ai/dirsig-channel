@@ -1,0 +1,95 @@
+nodes:
+  EulerOrientationEngine_3:
+    color: '#99D2D2'
+    hash: 06ed99c415fd30395ba3945f4bfbb0050566dcd0
+    links:
+      Orientation(s):
+        - outputPort: Entry
+          sourceNode: TimeEntry_11
+    name: EulerOrientationEngine_3
+    nodeClass: EulerOrientationEngine
+    tooltip: >-
+      Allows the user to specify orientation using Euler angles as a function fo
+      time.
+    values:
+      Frame: scene
+      Rotation Order: xyz
+    location:
+      x: 407
+      y: 573
+  FlexMotion_4:
+    color: '#99D2D2'
+    hash: 1397f7f8b92d6ff02567a744ee72b467fe8821e2
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: WaypointLocationEngine_13
+      OrientationEngine:
+        - outputPort: OrientationEngine
+          sourceNode: EulerOrientationEngine_3
+    name: FlexMotion_4
+    nodeClass: FlexMotion
+    tooltip: Controls the position and orientation of an object in the scene.
+    values: {}
+    location:
+      x: 828.5
+      y: 409
+  TimeEntry_10:
+    color: '#99D2D2'
+    hash: 384cd1d034b6d0e9fb4b96f0b1efd8fc09e0564e
+    links: {}
+    name: TimeEntry_10
+    nodeClass: TimeEntry
+    tooltip: Specifies an entry at one time step.
+    values:
+      Entry: '[0,200,300000]'
+      Time: '0.05'
+    location:
+      x: 0
+      y: 400
+  TimeEntry_11:
+    color: '#99D2D2'
+    hash: 384cd1d034b6d0e9fb4b96f0b1efd8fc09e0564e
+    links: {}
+    name: TimeEntry_11
+    nodeClass: TimeEntry
+    tooltip: Specifies an entry at one time step.
+    values:
+      Entry: '[0,0,0]'
+      Time: 0
+    location:
+      x: 0
+      y: 591
+  TimeEntry_9:
+    color: '#99D2D2'
+    hash: 384cd1d034b6d0e9fb4b96f0b1efd8fc09e0564e
+    links: {}
+    name: TimeEntry_9
+    nodeClass: TimeEntry
+    tooltip: Specifies an entry at one time step.
+    values:
+      Entry: '[0,-175,300000]'
+      Time: 0
+    location:
+      x: 0
+      y: 218
+  WaypointLocationEngine_13:
+    color: '#99D2D2'
+    hash: 0ea1541f8f3687228acc10799173db809e5ee5ea
+    links:
+      Position(s):
+        - outputPort: Entry
+          sourceNode: TimeEntry_9
+        - outputPort: Entry
+          sourceNode: TimeEntry_10
+    name: WaypointLocationEngine_13
+    nodeClass: WaypointLocationEngine
+    tooltip: >-
+      Lets user supply a set of waypoints to drive object motion as a function
+      of time.
+    values:
+      Frame: scene
+    location:
+      x: 407
+      y: 309
+version: 2

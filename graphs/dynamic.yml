@@ -1,122 +1,137 @@
 nodes:
-  Object:
+  B737:
     nodeClass: B737
+    links: {}
+    values: {}
 
-  Position2:
-    nodeClass: TimeEntry
-    values:
-      Time: 0.0
-      Entry: "[-100,0,5000]"
-
-  Position3:
-    nodeClass: TimeEntry
-    values:
-      Time: 1.0
-      Entry: "[+100,0,5000]"
-
-  Velocity:
-    nodeClass: VelocityOrientationEngine
-
-  Waypoint2:
-    nodeClass: WaypointLocationEngine
+  DIRSIG5:
+    nodeClass: DIRSIG5
     links:
-      Position(s):
-        - sourceNode: Position2
-          outputPort: Entry
-        - sourceNode: Position3
-          outputPort: Entry
-
-  Fixed2:
-    nodeClass: FixedLocationEngine
+      Scene:
+        - outputPort: Scene
+          sourceNode: Urban
+      Sensor:
+        - outputPort: Sensor
+          sourceNode: High Resolution EO Platform
     values:
-      Position: "[25,0,5000]"
+      Capture Duration (s): '1.0'
+      Ephemeris: Simple Solar Ephemeris
+      Reference Datetime: 2023-06-03T12:30
 
-  ObjectPlacement:
-   nodeClass: FlexMotion
-   links:
-      LocationEngine:
-        - sourceNode: Waypoint2
-          outputPort: LocationEngine
-      OrientationEngine:
-        - sourceNode: LookAt
-          outputPort: OrientationEngine
-
-  Dynamize:
+  DynamizeObjects:
     nodeClass: DynamizeObjects
     links:
       Flex Motion:
-        - sourceNode: ObjectPlacement
-          outputPort: Motion
+        - outputPort: Motion
+          sourceNode: AircraftFlexMotion
       Objects:
         - outputPort: B737 Object
-          sourceNode: Object
+          sourceNode: B737
+    values: {}
 
-  Scene:
-    #nodeClass: Sierra Nevada
-    # nodeClass: Desert Highway
+  FixedLocationEngine:
+    nodeClass: FixedLocationEngine
+    links: {}
+    values:
+      Frame: scene
+      Position: '[0,0,0]'
+
+  SensorFlexMotion:
+    nodeClass: FlexMotion
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: SensorWaypointLocation
+      OrientationEngine:
+        - outputPort: OrientationEngine
+          sourceNode: LookAtOrientationEngine
+    values: {}
+
+  AircraftFlexMotion:
+    nodeClass: FlexMotion
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: AircraftWaypointLocation
+      OrientationEngine:
+        - outputPort: OrientationEngine
+          sourceNode: VelocityOrientationEngine
+    values: {}
+
+  High Resolution EO Platform:
+    nodeClass: High Resolution EO Platform
+    links:
+      Flex Motion:
+        - outputPort: Motion
+          sourceNode: SensorFlexMotion
+    values:
+      Collect Geolocation: F
+      Collect Intersection: F
+      Detector Clock Rate (Hz): '5.0'
+      File Schedule: capture
+
+  LookAtOrientationEngine:
+    nodeClass: LookAtOrientationEngine
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: FixedLocationEngine
+    values:
+      Up Vector: '[0.0,0.0,1.0]'
+
+  SensorPosition:
+    nodeClass: TimeEntry
+    links: {}
+    values:
+      Entry: '[0,0,100000]'
+      Time: 0
+
+  AircraftPosition1:
+    nodeClass: TimeEntry
+    links: {}
+    values:
+      Entry: '[-100,0,5000]'
+      Time: '-0.1'
+
+  AircraftPosition2:
+    nodeClass: TimeEntry
+    links: {}
+    values:
+      Entry: '[+100,0,5000]'
+      Time: '2.0'
+
+  Urban:
     nodeClass: Urban
     links:
       Objects:
         - outputPort: Objects
-          sourceNode: Dynamize
+          sourceNode: DynamizeObjects
+    values: {}
 
-  Position1:
-    nodeClass: TimeEntry
+  VelocityOrientationEngine:
+    nodeClass: VelocityOrientationEngine
+    links: {}
     values:
-      Time: 0.0
-      Entry: "[0,0,100000]"
+      Frame: scene
 
-  Waypoint:
+  SensorWaypointLocation:
     nodeClass: WaypointLocationEngine
     links:
       Position(s):
-        - sourceNode: Position1
-          outputPort: Entry
-
-  Fixed:
-    nodeClass: FixedLocationEngine
+        - outputPort: Entry
+          sourceNode: SensorPosition
     values:
-      Position: "[0,0,0]"
+      Frame: scene
 
-  LookAt:
-    nodeClass: LookAtOrientationEngine
+  AircraftWaypointLocation:
+    nodeClass: WaypointLocationEngine
     links:
-      LocationEngine:
-        - sourceNode: Fixed
-          outputPort: LocationEngine
-    # values:
-    #   Up Vector: "[0.0,1.0,0.0]"
-
-  SensorPlacement:
-   nodeClass: FlexMotion
-   links:
-      LocationEngine:
-        - sourceNode: Waypoint
-          outputPort: LocationEngine
-      OrientationEngine:
-        - sourceNode: LookAt
-          outputPort: OrientationEngine
-
-  Sensor:
-    name: sensor
-    nodeClass: High Resolution EO Platform
-    links:
-      Flex Motion:
-        - sourceNode: SensorPlacement
-          outputPort: Motion
+      Position(s):
+        - outputPort: Entry
+          sourceNode: AircraftPosition1
+        - outputPort: Entry
+          sourceNode: AircraftPosition2
     values:
-      Detector Clock Rate (Hz): 3.0
-      File Schedule: 'capture'
+      Frame: scene
 
-  Simulate:
-    nodeClass: DIRSIG5
-    links:
-      Sensor:
-        - outputPort: Sensor
-          sourceNode: Sensor
-      Scene:
-        - outputPort: Scene
-          sourceNode: Scene
-    values:
-      Capture Duration (s): 1
 version: 2

@@ -1,0 +1,241 @@
+nodes:
+  EulerOrientationEngine_3:
+    color: '#99D2D2'
+    hash: 06ed99c415fd30395ba3945f4bfbb0050566dcd0
+    links:
+      Orientation(s):
+        - outputPort: Entry
+          sourceNode: TimeEntry_11
+    location:
+      x: 407
+      y: 573
+    name: EulerOrientationEngine_3
+    nodeClass: EulerOrientationEngine
+    ports:
+      inputs:
+        - description: >-
+            One or more TimeEntries where each represents a time dependent
+            orientation.
+          name: Orientation(s)
+          validation:
+            numLinks: oneOrMany
+        - default: xyz
+          description: Controls the order of how objects are rotated.
+          name: Rotation Order
+          select:
+            - xyz
+            - xzy
+            - yxz
+            - yzx
+            - zxy
+            - zyx
+          value: xyz
+        - default: scene
+          description: >-
+            scene for East-North-Up coordinates, geodetic for Lat-Lon-Alt
+            coordinate, ecef for Earth-Centered-Earth-Fixed coordinates.
+          name: Frame
+          select:
+            - scene
+            - geodetic
+            - ecef
+          value: scene
+      outputs:
+        - description: A complete OrientationEngine object.
+          name: OrientationEngine
+    tooltip: >-
+      Allows the user to specify orientation using Euler angles as a function fo
+      time.
+    values:
+      Frame: scene
+      Rotation Order: xyz
+  FlexMotion_4:
+    color: '#99D2D2'
+    hash: 1397f7f8b92d6ff02567a744ee72b467fe8821e2
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: WaypointLocationEngine_13
+      OrientationEngine:
+        - outputPort: OrientationEngine
+          sourceNode: EulerOrientationEngine_3
+    location:
+      x: 828.5
+      y: 409
+    name: FlexMotion_4
+    nodeClass: FlexMotion
+    ports:
+      inputs:
+        - description: >-
+            Any location engine will work. If none are provided then the sensor
+            will be placed at the origin.
+          name: LocationEngine
+          validation:
+            numLinks: zeroOrOne
+        - description: >-
+            Any orientation engine will work. If none are provided then the
+            sensor will "look at" the origin.
+          name: OrientationEngine
+          validation:
+            numLinks: zeroOrOne
+      outputs:
+        - description: A complete FlexMotion object
+          name: Motion
+    tooltip: Controls the position and orientation of an object in the scene.
+    values: {}
+  TimeEntry_10:
+    color: '#99D2D2'
+    hash: 384cd1d034b6d0e9fb4b96f0b1efd8fc09e0564e
+    links: {}
+    location:
+      x: 0
+      y: 400
+    name: TimeEntry_10
+    nodeClass: TimeEntry
+    ports:
+      inputs:
+        - default: '0.0'
+          description: Realtive time (seconds) from beginning of simulation.
+          name: Time
+          validation:
+            oneOf:
+              - type: number
+              - numLinks: one
+          value: '0.05'
+        - default: '[0.0,0.0,0.0]'
+          description: >-
+            Location (meters) relative to the origin, or rotation angles
+            (degrees).
+          name: Entry
+          validation:
+            oneOf:
+              - items:
+                  type: number
+                maxItems: 3
+                minItems: 3
+                type: array
+              - numLinks: one
+          value: '[200,0,300000]'
+      outputs:
+        - description: A timestamped entry.
+          name: Entry
+    tooltip: Specifies an entry at one time step.
+    values:
+      Entry: '[200,0,300000]'
+      Time: '0.05'
+  TimeEntry_11:
+    color: '#99D2D2'
+    hash: 384cd1d034b6d0e9fb4b96f0b1efd8fc09e0564e
+    links: {}
+    location:
+      x: 0
+      y: 591
+    name: TimeEntry_11
+    nodeClass: TimeEntry
+    ports:
+      inputs:
+        - default: '0.0'
+          description: Realtive time (seconds) from beginning of simulation.
+          name: Time
+          validation:
+            oneOf:
+              - type: number
+              - numLinks: one
+          value: 0
+        - default: '[0.0,0.0,0.0]'
+          description: >-
+            Location (meters) relative to the origin, or rotation angles
+            (degrees).
+          name: Entry
+          validation:
+            oneOf:
+              - items:
+                  type: number
+                maxItems: 3
+                minItems: 3
+                type: array
+              - numLinks: one
+          value: '[0,0,-1.5708]'
+      outputs:
+        - description: A timestamped entry.
+          name: Entry
+    tooltip: Specifies an entry at one time step.
+    values:
+      Entry: '[0,0,-1.5708]'
+      Time: 0
+  TimeEntry_9:
+    color: '#99D2D2'
+    hash: 384cd1d034b6d0e9fb4b96f0b1efd8fc09e0564e
+    links: {}
+    location:
+      x: 0
+      y: 218
+    name: TimeEntry_9
+    nodeClass: TimeEntry
+    ports:
+      inputs:
+        - default: '0.0'
+          description: Realtive time (seconds) from beginning of simulation.
+          name: Time
+          validation:
+            oneOf:
+              - type: number
+              - numLinks: one
+          value: 0
+        - default: '[0.0,0.0,0.0]'
+          description: >-
+            Location (meters) relative to the origin, or rotation angles
+            (degrees).
+          name: Entry
+          validation:
+            oneOf:
+              - items:
+                  type: number
+                maxItems: 3
+                minItems: 3
+                type: array
+              - numLinks: one
+          value: '[-175,0,300000]'
+      outputs:
+        - description: A timestamped entry.
+          name: Entry
+    tooltip: Specifies an entry at one time step.
+    values:
+      Entry: '[-175,0,300000]'
+      Time: 0
+  WaypointLocationEngine_13:
+    color: '#99D2D2'
+    hash: 0ea1541f8f3687228acc10799173db809e5ee5ea
+    links:
+      Position(s):
+        - outputPort: Entry
+          sourceNode: TimeEntry_9
+        - outputPort: Entry
+          sourceNode: TimeEntry_10
+    location:
+      x: 407
+      y: 309
+    name: WaypointLocationEngine_13
+    nodeClass: WaypointLocationEngine
+    ports:
+      inputs:
+        - description: ''
+          name: Position(s)
+        - default: scene
+          description: >-
+            scene for East-North-Up coordinates, geodetic for Lat-Lon-Alt
+            coordinate, ecef for Earth-Centered-Earth-Fixed coordinates.
+          name: Frame
+          select:
+            - scene
+            - geodetic
+            - ecef
+          value: scene
+      outputs:
+        - name: LocationEngine
+    tooltip: >-
+      Lets user supply a set of waypoints to drive object motion as a function
+      of time.
+    values:
+      Frame: scene
+version: 2

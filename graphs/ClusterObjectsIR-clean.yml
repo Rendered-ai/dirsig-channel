@@ -1,0 +1,202 @@
+nodes:
+  ClusterObjects:
+    nodeClass: ClusterObjects
+    links:
+      Objects:
+        - outputPort: Objects
+          sourceNode: ScaleObjects
+    values:
+      Number of Objects: 30
+      Radius (m): 100
+      Scene Location (m, m): '[0, 0]'
+
+  DIRSIG5:
+    nodeClass: DIRSIG5
+    links:
+      Reference Datetime:
+        - outputPort: Datetime
+          sourceNode: Datetime
+      Scene:
+        - outputPort: Scene
+          sourceNode: Desert Highway
+      Sensor:
+        - outputPort: Sensor
+          sourceNode: Thermal Sensor
+    values:
+      Capture Duration (s): 0
+      Ephemeris: Simple Solar Ephemeris
+
+  Datetime:
+    nodeClass: Datetime
+    links:
+      Hour:
+        - outputPort: value
+          sourceNode: Sweep np.arange
+    values:
+      Day: 1
+      Minute: '0'
+      Month: 1
+      Year: 2023
+
+  Desert Highway:
+    nodeClass: Desert Highway
+    links:
+      Objects:
+        - outputPort: Objects
+          sourceNode: ClusterObjects
+    values: {}
+
+  Electrical Transformer:
+    nodeClass: Electrical Transformer
+    links: {}
+    values: {}
+
+  FlexMotion:
+    nodeClass: FlexMotion
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: SensorWaypointLocation
+      OrientationEngine:
+        - outputPort: OrientationEngine
+          sourceNode: LookAtOrientationEngine
+    values: {}
+
+  LookAtOrientationEngine:
+    nodeClass: LookAtOrientationEngine
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: TargetWaypointLocation
+    values:
+      Up Vector: '[0.0,0.0,1.0]'
+
+  Random Integer 1:
+    nodeClass: Random Integer
+    links: {}
+    values:
+      high: '30000'
+      low: '20000'
+      size: null
+
+  Random Integer 2:
+    nodeClass: Random Integer
+    links: {}
+    values:
+      high: '10000'
+      low: '-10000'
+      size: null
+
+  Random Uniform 1:
+    nodeClass: Random Uniform
+    links: {}
+    values:
+      high: '1.5'
+      low: '0.5'
+      size: null
+
+  Random Uniform 2:
+    nodeClass: Random Uniform
+    links: {}
+    values:
+      high: '1.5'
+      low: '0.5'
+      size: null
+
+  ScaleObjects:
+    nodeClass: ScaleObjects
+    links:
+      Objects:
+        - outputPort: Electrical Transformer Object
+          sourceNode: Electrical Transformer
+      Scale Factors:
+        - outputPort: Vector
+          sourceNode: Vector3D 1
+    values: {}
+
+  Sweep np.arange:
+    nodeClass: Sweep np.arange
+    links: {}
+    values:
+      start: '4'
+      step: '3'
+      stop: '20'
+
+  Thermal Sensor:
+    nodeClass: Thermal Sensor
+    links:
+      Flex Motion:
+        - outputPort: Motion
+          sourceNode: FlexMotion
+    values:
+      Band Limits: '[8, 14]'
+      Collect Location: F
+      Collect Material: T
+      Collect Temperature: T
+      Detector Clock Rate (Hz): '30.0'
+      File Schedule: simulation
+      Focal Length: '5000'
+      MTF PSF Blur (pixels): '0'
+      Pixel Pitch: '10'
+      Pixels: '[640,480]'
+      Shutter Speed (s): '0.02'
+
+  SensorPosition:
+    nodeClass: TimeEntry
+    links:
+      Entry:
+        - outputPort: Vector
+          sourceNode: Vector3D 2
+    values:
+      Time: 0
+
+  TargetPosition:
+    nodeClass: TimeEntry
+    links: {}
+    values:
+      Entry: '[0,0,0]'
+      Time: 0
+
+  Vector3D 1:
+    nodeClass: Vector3D
+    links:
+      x:
+        - outputPort: out
+          sourceNode: Random Uniform 2
+      y:
+        - outputPort: out
+          sourceNode: Random Uniform 1
+    values:
+      z: 1
+
+  Vector3D 2:
+    nodeClass: Vector3D
+    links:
+      x:
+        - outputPort: out
+          sourceNode: Random Integer 2
+      y:
+        - outputPort: out
+          sourceNode: Random Integer 1
+    values:
+      z: '10000'
+
+  SensorWaypointLocation:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - outputPort: Entry
+          sourceNode: SensorPosition
+    values:
+      Frame: scene
+
+  TargetWaypointLocation:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - outputPort: Entry
+          sourceNode: TargetPosition
+    values:
+      Frame: scene
+
+version: 2

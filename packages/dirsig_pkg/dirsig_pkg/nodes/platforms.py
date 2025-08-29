@@ -273,3 +273,63 @@ class CustomRGBSensor(Node):
         }
         return {"Sensor": sensorAssets}
 
+
+class ThermalSensor(Node):
+    """ A class to represent the Thermal sensor node."""
+    
+    def exec(self):
+        logger.info("Executing {}".format(self.name))
+        
+        # Get the band limits
+        band_limits = fmt_VecNum(self.inputs['Band Limits'][0])
+
+        # Get the sensor properties
+        pixels = fmt_VecNum(self.inputs["Pixels"][0])
+        pitch = fmt_VecNum(self.inputs["Pixel Pitch"][0])
+        focal_length = float(self.inputs["Focal Length"][0])
+        
+        # Get the spectrometer (DIRSIG platform), optionally add truth collectors
+        truthBands = []
+        if self.inputs['Collect Location'][0] == "T":
+            truthBands.append("GeoLocation")
+            truthBands.append("Intersection")
+        if self.inputs['Collect Material'][0] == "T":
+            truthBands.append("Material")
+        if self.inputs['Collect Temperature'][0] == "T":
+            truthBands.append("Temperature")
+        
+        
+        detectorClockRate = self.inputs['Detector Clock Rate (Hz)'][0]
+        schedule = self.inputs['File Schedule'][0]
+        if ctx.preview:
+            schedule = "simulation"
+    
+        # Get PSF from node input
+        input_psf=int(self.inputs['MTF PSF Blur (pixels)'][0])
+        psf = ps.GaussianPSF(width=input_psf)
+
+        # Get shutter speed from node input
+        integration_time = float(self.inputs['Shutter Speed (s)'][0])
+        instrument = thermal_sensor(
+            band_limits=band_limits,
+            resolution=pixels,
+            pixel_pitch=pitch,
+            focal_length=focal_length,
+            truth_bands=truthBands,
+            schedule=schedule,
+            detector_clock_rate=detectorClockRate,
+            psf=psf,
+            integration_time=integration_time,
+        )
+        mountAttachment = ps.Attachment(ps.StaticMount("Static Mount"))
+        mountAttachment.add_attachment(ps.Attachment(instrument))
+        sensor = ps.PlatformSensor().add_attachment(mountAttachment)
+    
+        motion = self.inputs['Flex Motion'][0]
+        sensorAssets = {
+            'sensor': sensor,
+            'motion': motion,
+            'convert_args': [],
+        }
+        return {"Sensor": sensorAssets}
+    

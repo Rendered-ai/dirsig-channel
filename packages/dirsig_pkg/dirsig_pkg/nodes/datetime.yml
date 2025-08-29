@@ -1,0 +1,51 @@
+schemas:
+  Datetime:
+    category: Common
+    subcategory: Values
+    color: "#B3B3B3"
+    inputs:
+    - name: Year
+      description: Year of the datetime (integer) 
+      default: 2023
+      validation:
+        oneOf:
+          - type: integer
+          - numLinks: one
+    - name: Month
+      description: Month of the datetime (integer)
+      default: 1
+      validation:
+        oneOf:
+          - type: integer
+            minimum: 1
+            maximum: 12
+          - numLinks: one
+    - name: Day
+      description: Day of the datetime (integer)
+      default: 1
+      validation:
+        oneOf:
+          - type: integer
+            minimum: 1
+            maximum: 31
+          - numLinks: one
+    - name: Hour
+      description: Hour of the datetime (integer)
+      default: 12
+      validation:
+        oneOf:
+          - type: integer
+            minimum: 0
+            maximum: 23
+          - numLinks: one
+    - name: Minute
+      description: Minute of the datetime (integer)
+      default: 0
+      validation:
+        oneOf:
+          - type: integer
+            minimum: 0
+            maximum: 59
+          - numLinks: one
+    outputs:
+    - name: Datetime

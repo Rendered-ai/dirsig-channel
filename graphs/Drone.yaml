@@ -1,0 +1,103 @@
+nodes:
+  DIRSIG5:
+    nodeClass: DIRSIG5
+    links:
+      Scene:
+        - outputPort: Scene
+          sourceNode: DesertHighway
+      Sensor:
+        - outputPort: Sensor
+          sourceNode: Drone
+    values:
+      Capture Duration (s): 0
+      Ephemeris: Simple Solar Ephemeris
+      Reference Datetime: 2023-06-03T12:30
+
+  DesertHighway:
+    nodeClass: Desert Highway
+    links:
+      Objects:
+        - outputPort: Objects
+          sourceNode: PoseObjects
+    values: {}
+
+  Drone:
+    nodeClass: Drone
+    links:
+      Flex Motion:
+        - outputPort: Motion
+          sourceNode: SensorFlexMotion
+    values:
+      Detector Clock Rate (Hz): '30.0'
+      File Schedule: simulation
+
+  SensorFlexMotion:
+    nodeClass: FlexMotion
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: SensorWaypointLocation
+      OrientationEngine:
+        - outputPort: OrientationEngine
+          sourceNode: LookAtOrientation
+    values: {}
+
+  LookAtOrientation:
+    nodeClass: LookAtOrientationEngine
+    links:
+      LocationEngine:
+        - outputPort: LocationEngine
+          sourceNode: TargetWaypointLocation
+    values:
+      Up Vector: '[0.0,0.0,1.0]'
+
+  MacbethColorChart:
+    nodeClass: Macbeth Color Chart
+    links: {}
+    values: {}
+
+  PoseObjects:
+    nodeClass: PoseObjects
+    links:
+      Objects:
+        - outputPort: Color Chart Object
+          sourceNode: MacbethColorChart
+    values:
+      Match Elevation: 'False'
+      Match Slope: 'False'
+      Rotation (deg): '[0,0,60]'
+      Translation (m): '[0,110,1]'
+
+  SensorPosition:
+    nodeClass: TimeEntry
+    links: {}
+    values:
+      Entry: '[0,20,80]'
+      Time: 0
+
+  TargetPosition:
+    nodeClass: TimeEntry
+    links: {}
+    values:
+      Entry: '[0,110,8]'
+      Time: 0
+
+  SensorWaypointLocation:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - outputPort: Entry
+          sourceNode: SensorPosition
+    values:
+      Frame: scene
+
+  TargetWaypointLocation:
+    nodeClass: WaypointLocationEngine
+    links:
+      Position(s):
+        - outputPort: Entry
+          sourceNode: TargetPosition
+    values:
+      Frame: scene
+
+version: 2

@@ -16,25 +16,9 @@
 #---------------------------------------
 
 schemas:
-  ScaleObjects:
-    tooltip: Scale the object's size by XYZ multiplicative factors
-    category: Scenes
-    subcategory: Object Modifiers
-    color: '#3A4928'
-    inputs:
-    - name: Objects
-      description: One or more objects to scale
-      validation:
-        numLinks: oneOrMany
-    - name: Scale Factors
-      description: Multiplicative factors to stretch or shrink the object
-      default: "[1.0, 1.0, 1.0]"
-    outputs:
-    - name: Objects
-      description: Scaled input objects
-
   DynamizeObjects:
     tooltip: Set an object's dynamic location and orientation
+    help: dirsig_pkg/instance_modifiers/dynamize_objects.md
     category: Scenes
     subcategory: Object Modifiers
     color: '#3A4928'
@@ -52,6 +36,7 @@ schemas:
   
   PoseObjects:
     tooltip: Explicitly set an object's location and orientation
+    help: dirsig_pkg/instance_modifiers/pose_objects.md
     category: Scenes
     subcategory: Object Modifiers
     color: '#3A4928'
@@ -72,32 +57,13 @@ schemas:
       select:
       - "True"
       - "False"
+    - name: Match Elevation
+      description: Raise the object to match the elevation of the terrain; overrides the Translation setting
+      default: "False"
+      select:
+      - "True"
+      - "False"
     outputs:
     - name: Objects
       description: Objects with updated position
     
-  ClusterObjects:
-    tooltip: Place an bunch of objects near a specific location
-    category: Scenes
-    subcategory: Object Modifiers
-    color: '#3A4928'
-    inputs: 
-    - name: Objects
-      description: Objects to place
-      validation:
-        numLinks: oneOrMany
-    - name: Scene Location (m, m)
-      description: Location in scene coordinates to place the object
-      default: "[0, 0]"
-      validation:
-        oneOf:
-          - type: array
-          - numLinks: one
-    - name: Number of Objects
-      description: How many object to place
-      default: 1
-    - name: Radius (m)
-      description: Extent of cluster
-      default: 1.0
-    outputs:
-    - name: Objects

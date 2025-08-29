@@ -119,6 +119,7 @@ schemas:
     category: Platforms
     subcategory: Sensors
     tooltip: RGB 35mm 1280x720 Camera
+    help: dirsig_pkg/platforms/Drone.md
     color: "#D4BF88"
     inputs:
     - name: Flex Motion
@@ -139,6 +140,7 @@ schemas:
     category: Platforms
     subcategory: Sensors
     tooltip: NASA's AVIRIS (Classic) airborne hyperspectral imaging system
+    help: dirsig_pkg/platforms/AVIRIS.md
     color: "#D4BF88"
     inputs:
     - name: Collect Material
@@ -173,6 +175,7 @@ schemas:
     category: Platforms
     subcategory: Sensors
     tooltip: A simple RGB sensor you can customize.
+    help: dirsig_pkg/platforms/CustomRGBSensor.md
     color: "#D4BF88"
     inputs:
     - name: Pixels
@@ -210,5 +213,85 @@ schemas:
     - name: Flex Motion
       validation:
         numLinks: one
+    outputs:
+    - name: Sensor
+
+  ThermalSensor:
+    alias: Thermal Sensor
+    category: Platforms
+    subcategory: Sensors
+    tooltip: Thermal sensor
+    help: dirsig_pkg/platforms/ThermalSensor.md
+    color: "#D4BF88"
+    inputs:
+    - name: Band Limits
+      default: "[8, 14]"
+      description: Band limits in microns
+      validation:
+        array:
+          items:
+            type: float
+            minimum: 0.00001
+          minItems: 2
+          maxItems: 2
+    - name: Pixels
+      default: "[320,240]"
+      description: Number of pixels in x-dim and y-dim
+      validation:
+        array:
+          items:
+            type: integer
+            minimum: 1
+          minItems: 2
+          maxItems: 2
+    - name: Pixel Pitch
+      default: "10"
+      description: Size and spacing of pixels in x-dim and y-dim (microns)
+      validation:
+        float:
+          minimum: 0.001
+    - name: Focal Length
+      default: "30.0"
+      description: Focal length of sensor (millimeters)
+      validation:
+        float:
+            minimum: 0.00001
+    - name: Shutter Speed (s)
+      default: "0.02"
+      description: Shutter speed of sensor (seconds)
+      validation:
+        float:
+            minimum: 0.0
+    - name: MTF PSF Blur (pixels)
+      default: "0"
+      description: MTF PSF blur in pixels
+      validation:
+        float:
+            minimum: 0.0
+    - name: Flex Motion
+      validation:
+        numLinks: one
+    - name: Collect Location
+      default: T
+      select: [T, F]
+      validation:
+        type: string
+    - name: Collect Material
+      default: T
+      select: [T, F]
+      validation:
+        type: string
+    - name: Collect Temperature
+      default: T
+      select: [T, F]
+      validation:
+        type: string
+    - name: Detector Clock Rate (Hz)
+      default: "30.0"
+      validation:
+        type: float
+    - name: File Schedule
+      default: simulation
+      select: [simulation, capture, task]
     outputs:
     - name: Sensor

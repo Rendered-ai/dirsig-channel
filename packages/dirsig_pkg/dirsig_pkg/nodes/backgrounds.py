@@ -25,8 +25,8 @@ import dirfm.glist as glist
 from dirfm.scene import SCENE
 from dirfm import materials
 from dirfm import frames
+from dirfm.glist import DynamicInstance
 from dirsig_pkg.lib.scene_utils import terrain_scene, elevation, align_directions
-from dirsig_pkg.lib.cluster_generator_random import RandomClusterGenerator
 from dirsig_pkg.lib.object import AnaDirsigObject, file_to_objgen
 from itertools import count
 
@@ -65,11 +65,27 @@ def scene_object(scene_name):
     return sceneObj
 
 
-def match_objects_to_terrain(ana_object, elevation_glist_path):
-    """ Update the position of each object instance as follows
-    1. Raise the z value of the translation by the elevation of the terrain
-    2. Optionally, rotate the object to match the terrain normal
+def align_objects_with_terrain(ana_object, elevation_glist_path, anchor_name=None):
+    """ Align objects with the terrain by adjusting their position and orientation.
+    
+    This function performs two main operations:
+    1. When match_elevation is set, set anchors for StaticInstanceBinary and StaticInstanceBinaryFile
+    2. For StaticInstances:
+       - Adjust the z-coordinate based on terrain elevation at the object's x,y position
+       - When match_slope is set, rotate the object to align with the terrain's surface normal
+    
+    Args:
+        ana_object: The object to align with terrain
+        elevation_glist_path: Path to the elevation glist file
+        anchor_name: Optional name of the anchor to use for elevation matching
     """
+    #Set anchors for all instances of objects
+    if ana_object.match_elevation:
+        for objInstance in ana_object.root.get_instances():
+            if type(objInstance) is not glist.DynamicInstance:
+                objInstance.set_anchor(anchor_name)
+
+    # Only objects with static instances can be explicitly aligned with terrain
     if glist.StaticInstance not in [type(i) for i in ana_object.root.get_instances()]:
         return
 
@@ -78,8 +94,9 @@ def match_objects_to_terrain(ana_object, elevation_glist_path):
     terrainBundleObject = glist.Object(baseGeometry)
     elevationHdfpath = terrain_scene(terrainBundleObject)
 
+    # Update the position of each object instance
     for objInstance in ana_object.root.get_instances():
-        if type(objInstance)==glist.StaticInstance:
+        if type(objInstance) is glist.StaticInstance:
             trans = objInstance.get_translation()
             e, surfaceNormal = elevation(elevationHdfpath, trans[0], trans[1])
             trans[2]+=e
@@ -90,7 +107,6 @@ def match_objects_to_terrain(ana_object, elevation_glist_path):
                 rot = objInstance.get_rotation()
                 eulerAngles = align_directions(surfaceNormal, [0,0,1], units='degrees')
                 objInstance.set_rotation([eulerAngles[0], eulerAngles[1], rot[2]])
-
 
 class SierraNevada(Node):
     """ Region of the Sierra Nevada - 150 x 150 km in size, low res scene
@@ -138,19 +154,15 @@ class SierraNevada(Node):
             })
             #Add the instance to the glist
             objectsGList.add_object(anaObject.root)
-
-            #Collect object names for abundance truth collection
-            names.append(anaObject.name)
-            
-            #Update anchor names for binary instances
-            for objInstance in anaObject.root.get_instances():
-                if type(objInstance) in [glist.StaticInstanceBinary, glist.StaticInstanceBinaryFile]:
-                    objInstance.set_anchor(anchorName)
             
             #Update object's elevation for static instances
             elevationGListPath = Path(get_volume_path("dirsig_pkg", "dirsig-shared:Sierra_Nevada/bundles/terrain/elevation.glist"))
-            match_objects_to_terrain(anaObject, elevationGListPath)
-
+            align_objects_with_terrain(anaObject, elevationGListPath)
+            
+            #Collect object instance names for abundance truth collection
+            for objInstance in anaObject.root.get_instances():
+                names.append(objInstance.get_name())
+            
             sceneObj.add_geometry("Objects", objectsGList)
 
         metadata['Object Modifiers'] = objectMetadata
@@ -315,7 +327,7 @@ class DesertHighwayScene(Node):
         sceneObj = (
             SCENE("solar")
             .set_origin(location)
-            .set_properties("vis,nir")
+            .set_properties("vis,nir,swir,mwir,lwir")
             .add_geometry("Terrain", desert)
         )
 
@@ -343,18 +355,14 @@ class DesertHighwayScene(Node):
                 "modifiers": anaObject.modifiers,
             })
             objectsGList.add_object(anaObject.root)
-
-            #Collect object names for abundance truth collection
-            names.append(anaObject.name)
-            
-            #Update anchor names for binary instances
-            for objInstance in anaObject.root.get_instances():
-                if type(objInstance) in [glist.StaticInstanceBinary, glist.StaticInstanceBinaryFile]:
-                    objInstance.set_anchor(anchorName)
             
             #Update object's elevation for static instances
             elevationGListPath = Path(get_volume_path("dirsig_pkg", "dirsig-shared:Desert_Highway_v2/geometry/Terrain_elevation.glist"))
-            match_objects_to_terrain(anaObject, elevationGListPath)
+            align_objects_with_terrain(anaObject, elevationGListPath, anchorName)
+
+            #Collect object instance names for abundance truth collection
+            for objInstance in anaObject.root.get_instances():
+                names.append(objInstance.get_name())
 
         sceneObj.add_geometry("Objects", objectsGList)
 
@@ -909,7 +917,7 @@ class LWIRUrbanAltScene(Node):
         sceneObj = (
             SCENE("solar")
             .set_origin( location)
-            .set_properties("vis,nir")
+            .set_properties("vis,nir,swir,mwir,lwir")
             .add_geometry("terrain", urban)
         )
 
@@ -937,18 +945,14 @@ class LWIRUrbanAltScene(Node):
                 "modifiers": anaObject.modifiers,
             })
             objectsGList.add_object(anaObject.root)
-
-            #Collect object names for abundance truth collection
-            names.append(anaObject.name)
-            
-            #Update anchor names for binary instances
-            for objInstance in anaObject.root.get_instances():
-                if type(objInstance) in [glist.StaticInstanceBinary, glist.StaticInstanceBinaryFile]:
-                    objInstance.set_anchor(anchorName)
             
             #Update object's elevation for static instances
             elevationGListPath = Path(get_volume_path("dirsig_pkg", "dirsig-shared:LWIR_Urban_Alt/geometry/terrain_elevation.glist"))
-            match_objects_to_terrain(anaObject, elevationGListPath)
+            align_objects_with_terrain(anaObject, elevationGListPath, anchorName)
+
+            #Collect object instance names for abundance truth collection
+            for objInstance in anaObject.root.get_instances():
+                names.append(objInstance.get_name())
             
         sceneObj.add_geometry("Objects", objectsGList)
 

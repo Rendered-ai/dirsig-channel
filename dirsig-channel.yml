@@ -1,5 +1,5 @@
 add_packages:
-- dirsig_pkg
+ - dirsig_pkg
 
 add_setup: []
 # - dirsig_pkg.lib.setup
@@ -65,3 +65,11 @@ add_nodes:
   
   - package: anatools
     name: VolumeFile
+
+
+remotes:
+  - channelId: 246c5c77-b128-485f-b178-2596023f6c59
+    name: dirsig-open-v0.2
+    description: Use DIRSIG for generating synthetic data on Rendered.ai.
+    instance: c6a.8xlarge
+    timeout: 3600
