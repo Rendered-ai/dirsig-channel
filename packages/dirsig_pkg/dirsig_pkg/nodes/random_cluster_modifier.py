@@ -26,7 +26,8 @@ from anatools.lib.node import Node
 from anatools.lib.generator import ObjectModifier
 from dirsig_pkg.lib.object import AnaDirsigObject, file_to_objgen
 from dirsig_pkg.lib.utils import array_input
-from dirsig_pkg.lib.spatial_sampling_utils import random_points_in_polygon, hexagon
+from dirsig_pkg.lib.spatial_sampling_utils import random_points_in_polygon, hexagon, random_points_in_polygon_with_min_distance
+import numpy as np
 import anatools.lib.context as ctx
 from dirfm import glist
 
@@ -72,8 +73,28 @@ class ClusterObjects(Node):
         center = array_input(self.inputs['Scene Location (m, m)'][0])
         radius = int(self.inputs["Radius (m)"][0])
 
+        prevent_overlap = self.inputs["Prevent Overlap"][0] == 'True'
+
         poly = hexagon(center, radius)
-        xy_locations = random_points_in_polygon(poly, n_objects)
+
+        if prevent_overlap:
+            # Get the size of each object and find the largest dimension
+            max_dim = 0
+            # Instantiate each object to get its size
+            object_instances = [child.exec() for child in children]
+            for obj in object_instances:
+                size = obj.get_size()
+                if size:
+                    max_dim = max(max_dim, np.max(size[:2]))
+            if max_dim > 0:
+                spacing = max_dim * 1.5
+                logger.info(f"Preventing overlap with minimum distance of {spacing:.2f}m")
+                xy_locations = random_points_in_polygon_with_min_distance(poly, n_objects, spacing)
+            else:
+                logger.warning("Could not determine object size, placing objects without overlap prevention.")
+                xy_locations = random_points_in_polygon(poly, n_objects)
+        else:
+            xy_locations = random_points_in_polygon(poly, n_objects)
 
         # Add modifier to the generator tree
         generator = ObjectModifier(

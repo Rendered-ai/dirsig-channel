@@ -25,6 +25,18 @@ import os
 PACKAGE_ROOT = os.path.join('packages', 'dirsig_pkg', 'dirsig_pkg')
 
 def instrument(instrument_name, focal_length, focal_plane=None, aperture_diameter=None, aperture_throughput=None):
+    """Creates a DIRSIG generic instrument with specified optical properties.
+
+    Args:
+        instrument_name (str): The name of the instrument.
+        focal_length (float): The focal length of the instrument.
+        focal_plane (dirfm.platform_sensor.FocalPlane, optional): A focal plane to add to the instrument. Defaults to None.
+        aperture_diameter (float, optional): The diameter of the aperture. Defaults to None.
+        aperture_throughput (float, optional): The throughput of the aperture [0-1]. Defaults to None.
+
+    Returns:
+        A configured dirfm instrument.
+    """
     
     instrument = ps.GenericInstrument(instrument_name)
     instrument.add_property(
@@ -36,15 +48,41 @@ def instrument(instrument_name, focal_length, focal_plane=None, aperture_diamete
     return instrument
 
 
-def detector_array(resolution=(1024, 1280), pixel_pitch=5, detector_clock_rate=0.9):
+def detector_array(resolution=(1024, 1280), pixel_pitch=5, detector_clock_rate=0.9, offset=(0,0), flip=(False, True)):
+    """Creates a DIRSIG detector array.
+
+    Args:
+        resolution (tuple, optional): The (width, height) of the array in pixels. Defaults to (1024, 1280).
+        pixel_pitch (float, optional): The size of each pixel in microns. Defaults to 5.
+        detector_clock_rate (float, optional): The clock rate of the detector in Hz. Defaults to 0.9.
+        offset (tuple, optional): The offset of the detector array in microns. Defaults to (0,0).
+        flip (tuple, optional): The flip axis of the detector array. Defaults to (False, True).
+
+    Returns:
+        A configured dirfm detector array.
+    """
     detectorArray = ps.DetectorArray("microns")
     detectorArray.set_clock(ps.IndependentDetectorClock(detector_clock_rate, 0))
-    detectorArray.set_elements(resolution[0], resolution[1], pixel_pitch, pixel_pitch, pixel_pitch, pixel_pitch, 0, 0, False, True)
+    detectorArray.set_elements(resolution[0], resolution[1], pixel_pitch, pixel_pitch, pixel_pitch, pixel_pitch, offset[0], offset[1], flip[0], flip[1])
     return detectorArray
 
 
 def focal_plane(band_name, image_file, spectral_response,
                 int_time=None, psf=None, dirfm_detector_array=None):
+    """Creates a DIRSIG focal plane with a capture method and detector array.
+
+    Args:
+        band_name (str): The name of the focal plane assembly (e.g., "Red FPA").
+        image_file (dirfm.platform_sensor.ImageFile): The image file object for output.
+        spectral_response (dirfm.platform_sensor.SpectralResponse): The spectral response for this focal plane.
+        int_time (float, optional): The integration time. Defaults to None.
+        psf (dirfm.platform_sensor.PSF, optional): The point spread function. Defaults to None.
+        dirfm_detector_array (dirfm.platform_sensor.DetectorArray, optional): A pre-configured detector array. 
+            If None, a default one is created. Defaults to None.
+
+    Returns:
+        A configured dirfm focal plane.
+    """
     
     # Create a capture method
     captureMethod = ps.BasicCaptureMethod("Simple")
@@ -153,7 +191,7 @@ def rgb_camera(
     )
     mountAttachment = ps.Attachment(staticMount)
     mountAttachment.add_attachment(ps.Attachment(rgbInstrument))
-    sensor = ps.PlatformSensor().add_attachment(mountAttachment)
+    sensor = ps.PlatformSensorPlugin().add_attachment(mountAttachment)
 
     return sensor
 
@@ -186,7 +224,7 @@ def wv3_sensor(truth_bands=[], schedule="simulation", detector_clock_rate=30):
 
     mountAttachment = ps.Attachment(ps.StaticMount("Static Mount"))
     mountAttachment.add_attachment(ps.Attachment(wv3Instrument))
-    sensor = ps.PlatformSensor().add_attachment(mountAttachment)
+    sensor = ps.PlatformSensorPlugin().add_attachment(mountAttachment)
 
     return sensor
 
@@ -219,7 +257,7 @@ def skysat_sensor(truth_bands=[], schedule="simulation", detector_clock_rate=30)
 
     mountAttachment = ps.Attachment(ps.StaticMount("Static Mount"))
     mountAttachment.add_attachment(ps.Attachment(skysatInstrument))
-    sensor = ps.PlatformSensor().add_attachment(mountAttachment)
+    sensor = ps.PlatformSensorPlugin().add_attachment(mountAttachment)
 
     return sensor
 
@@ -252,7 +290,7 @@ def superdove_sensor(truth_bands=[], schedule="simulation", detector_clock_rate=
 
     mountAttachment = ps.Attachment(ps.StaticMount("Static Mount"))
     mountAttachment.add_attachment(ps.Attachment(superdoveInstrument))
-    sensor = ps.PlatformSensor().add_attachment(mountAttachment)
+    sensor = ps.PlatformSensorPlugin().add_attachment(mountAttachment)
 
     return sensor
 
@@ -285,7 +323,7 @@ def aviris_sensor(truth_bands=[], schedule="simulation", detector_clock_rate=100
 
     mountAttachment = ps.Attachment(ps.StaticMount("Static Mount"))
     mountAttachment.add_attachment(ps.Attachment(avirisInstrument))
-    sensor = ps.PlatformSensor().add_attachment(mountAttachment)
+    sensor = ps.PlatformSensorPlugin().add_attachment(mountAttachment)
 
     return sensor
 
@@ -312,3 +350,117 @@ def thermal_sensor(integration_time=None, band_limits=[8, 14], focal_length=1142
     instrument.add_focal_plane(thermalFocalPlane)
     
     return instrument
+
+
+def altumPT_sensor(resolution=(2064, 1544), truth_bands=[], rgb_only=False, use_real_integration_times=False, detector_clock_rate=30, schedule="simulation", add_pan=False, override_focal_length=None, mount_orientation="Down", pan_only=False, sensor_name=None):
+    sensorName = sensor_name if sensor_name else "AltumPT"
+    datatype = 4
+
+    imgbasename = '{:010}-{}'.format(ctx.interp_num, sensorName)
+    truthCollection = None
+    if truth_bands:
+        truthCollectionName = f"{imgbasename}_Green-truth"
+        if pan_only:
+            truthCollectionName = f"{imgbasename}-truth"
+        truthCollection = ps.TruthCollection(truthCollectionName)
+        for truthCollectorName in truth_bands:
+            truthCollection.add_collection(truthCollectorName)
+
+    # Define band properties
+    band_definitions = {
+        "Blue": {"center": 0.475, "width": 0.032},
+        "Green": {"center": 0.560, "width": 0.027},
+        "Red": {"center": 0.668, "width": 0.016},
+        "Red Edge": {"center": 0.717, "width": 0.012},
+        "NIR": {"center": 0.842, "width": 0.057},
+        "Pan": {"center": 0.6345, "width": 0.463}
+    }
+
+    msi_spectral_response = None
+    if not pan_only:
+        if rgb_only:
+            inst = ps.GenericInstrument(sensorName + "_RGB")
+        else:
+            inst = ps.GenericInstrument(sensorName + "_MSI")
+        msi_spectral_response = ps.SpectralResponse()
+        min_wl = band_definitions['Blue']['center'] - band_definitions['Blue']['width']/2
+        max_wl = band_definitions['NIR']['center'] + band_definitions['NIR']['width']/2
+        num_samples = 500
+        step = (max_wl - min_wl) / num_samples
+        msi_spectral_response.set_band("microns", min_wl, max_wl, step=step)
+
+        msi_bands_to_add = ["Blue", "Green", "Red", "Red Edge", "NIR"]
+        if rgb_only or ctx.preview:
+            msi_bands_to_add = ["Blue", "Green", "Red"]
+
+        for band_name in msi_bands_to_add:
+            band = band_definitions[band_name]
+            msi_spectral_response.add_channel(ps.FunctionalChannel(band_name, band['center'], band['width']))
+
+    # Create PAN spectral response
+    pan_band = band_definitions['Pan']
+    pan_spectral_response = ps.SpectralResponse()
+    min_wl_pan = pan_band['center'] - pan_band['width']/2
+    max_wl_pan = pan_band['center'] + pan_band['width']/2
+    pan_step = (max_wl_pan - min_wl_pan) / 100 # Use 100 samples for PAN band
+    pan_spectral_response.set_band("microns", min_wl_pan, max_wl_pan, step=pan_step)
+    pan_spectral_response.add_channel(ps.FunctionalChannel('Pan', pan_band['center'], pan_band['width']))
+
+    msi_focal_plane = None
+    if not pan_only:
+        msi_img_basename = f"{imgbasename}_MSI"
+        msi_img_file = ps.ImageFile(msi_img_basename, schedule=schedule)
+        msi_detector = detector_array(resolution=resolution, pixel_pitch=3.45, detector_clock_rate=detector_clock_rate)
+        msi_focal_plane = focal_plane("MSI", msi_img_file, msi_spectral_response, dirfm_detector_array=msi_detector)
+        if truthCollection:
+            msi_focal_plane.set_truth_collection(truthCollection)
+
+    # Create PAN focal plane
+    pan_img_basename = imgbasename if pan_only else f"{imgbasename}_PAN"
+    pan_img_file = ps.ImageFile(pan_img_basename, schedule=schedule)
+    # PAN resolution is 2x MSI when used alongside MSI, otherwise use resolution directly
+    pan_resolution = resolution if pan_only else (resolution[0]*2, resolution[1]*2)
+    pan_detector = detector_array(resolution=pan_resolution, pixel_pitch=3.45, detector_clock_rate=detector_clock_rate)
+    pan_focal_plane = focal_plane("PAN", pan_img_file, pan_spectral_response, dirfm_detector_array=pan_detector)
+
+    if pan_only:
+        if truthCollection:
+            pan_focal_plane.set_truth_collection(truthCollection)
+        if override_focal_length is not None:
+            pan_focal_length = float(override_focal_length)
+        else:
+            pan_focal_length = 8.2
+    else:
+        if override_focal_length is not None:
+            msi_focal_length = float(override_focal_length)
+            pan_focal_length = float(override_focal_length) * 2.0
+        else:
+            msi_focal_length = 8.0
+            pan_focal_length = 16.4
+
+        inst.add_property(ps.FocalLengthInstrumentProperty(msi_focal_length, units="mm", aperture_diameter=1.8))
+        inst.add_focal_plane(msi_focal_plane)
+
+    # Create the PAN instrument
+    panInstrument = ps.GenericInstrument(sensorName + " PAN")
+    panInstrument.add_property(ps.FocalLengthInstrumentProperty(pan_focal_length, units="mm", aperture_diameter=4.5))
+    panInstrument.add_focal_plane(pan_focal_plane)
+
+    # Determine mount rotation based on orientation
+    if mount_orientation == "Forward":
+        mount_rotation = (90, 0, 0)
+    else:  # Default "Down" orientation
+        mount_rotation = (0, 0, 0)
+
+    # Create the sensor and mount with the MSI and PAN instruments
+    sensor = ps.PlatformSensorPlugin()
+    mountAttachment = ps.Attachment(ps.StaticMount("Mount").set_rotation("xyz", "degrees", mount_rotation[0], mount_rotation[1], mount_rotation[2]))
+    if pan_only:
+        mountAttachment.add_attachment(ps.Attachment(panInstrument))
+    else:
+        mountAttachment.add_attachment(ps.Attachment(inst))
+        if not rgb_only and add_pan:
+            mountAttachment.add_attachment(ps.Attachment(panInstrument))
+    sensor.add_attachment(mountAttachment)
+
+    return sensor

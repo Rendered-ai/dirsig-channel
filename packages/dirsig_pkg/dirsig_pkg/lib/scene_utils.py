@@ -19,6 +19,9 @@ import pdb
 import subprocess
 import os
 import json
+import re
+import hashlib
+import tempfile
 import numpy as np
 from scipy.spatial.transform import Rotation
 from pathlib import Path
@@ -35,8 +38,97 @@ for d in DIRS.values():
     if not os.path.isdir(str(d)):
         os.mkdir(str(d))
 
-def terrain_scene(terrain_bundle_object):
 
+# Pattern for splitting multi-curve <beziercurveset> blocks. The bundled
+# LWIR_Urban_Alt power_line.glist asset stores 3 cubic Bezier curves per
+# <beziercurveset> with a single <matid>, which DIRSIG treats as a
+# materialData array of size 1 even though it produces 3 primitives.
+# Shadow rays striking the 2nd or 3rd curve then trip
+# 'Out of range object material requested!'
+# (size_t(ray.primID) >= obj->materialData.size()) and abort the run.
+# patch_glist_split_beziercurvesets() rewrites such files so each
+# <beziercurveset> contains exactly one curve with its own <matid>.
+_BEZIER_CURVESET_RE = re.compile(
+    r'<beziercurveset>\s*<vertexdata>(.*?)</vertexdata>\s*'
+    r'<firstindexes>([^<]+)</firstindexes>\s*'
+    r'<matid>([^<]+)</matid>\s*</beziercurveset>',
+    re.DOTALL,
+)
+
+
+def _split_beziercurveset(match):
+    """Replace a multi-curve <beziercurveset> with one set per curve.
+
+    Vertex data is a flat sequence of 4-tuples (x, y, z, radius). Curves
+    are cubic Beziers with 4 control points each, and <firstindexes> lists
+    the start index of every curve in the shared vertex array. Adjacent
+    curves share an endpoint, so curve i spans verts[start_i : start_{i+1}+1]
+    (the last curve runs to the end of the vertex array).
+    """
+    verts_text = match.group(1)
+    fi_text = match.group(2).strip()
+    matid_text = match.group(3).strip()
+    starts = fi_text.split()
+    if len(starts) <= 1:
+        return match.group(0)
+    nums = verts_text.split()
+    # Each control point is 4 floats (x y z radius); refuse to touch malformed data.
+    if len(nums) % 4 != 0:
+        return match.group(0)
+    n_verts = len(nums) // 4
+    starts_i = [int(s) for s in starts]
+    chunks = []
+    for i, s in enumerate(starts_i):
+        e = starts_i[i + 1] + 1 if i + 1 < len(starts_i) else n_verts
+        curve_nums = nums[s * 4 : e * 4]
+        chunks.append(
+            '<beziercurveset>\n'
+            '<vertexdata>{}</vertexdata>\n'
+            '<firstindexes>0</firstindexes>\n'
+            '<matid>{}</matid>\n'
+            '</beziercurveset>'.format(' '.join(curve_nums), matid_text)
+        )
+    return '\n'.join(chunks)
+
+
+def patch_glist_split_beziercurvesets(source_path):
+    """Return a glist Path with single-curve <beziercurveset> blocks.
+
+    If the source already contains only single-curve sets the original path
+    is returned untouched. Otherwise a patched copy is cached under
+    /tmp/dirsig_pkg_patched/ keyed by source path + mtime + size, and that
+    cached path is returned. Subsequent calls with an unchanged source reuse
+    the cached file.
+    """
+    source_path = Path(source_path)
+    src = source_path.read_text()
+    # Fast bail-out: only rewrite if at least one set has multiple curves.
+    if not any(
+        len(m.group(2).split()) > 1 for m in _BEZIER_CURVESET_RE.finditer(src)
+    ):
+        return source_path
+
+    stat = source_path.stat()
+    key_seed = "{}|{}|{}".format(source_path, stat.st_mtime_ns, stat.st_size)
+    digest = hashlib.sha1(key_seed.encode()).hexdigest()[:12]
+    cache_dir = Path(tempfile.gettempdir()) / "dirsig_pkg_patched"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    out_path = cache_dir / "{}_{}.glist".format(source_path.stem, digest)
+    if not out_path.exists():
+        patched = _BEZIER_CURVESET_RE.sub(_split_beziercurveset, src)
+        out_path.write_text(patched)
+    return out_path
+
+
+def terrain_scene(terrain_bundle_object):
+        """Compile a one-object elevation scene to HDF for height/normal lookups.
+
+        The input is expected to be a glist.Object wrapping an *elevation
+        scene glist* — a single-object glist whose base geometry is a terrain
+        heightmap (e.g. ``<scene>/geometry/terrain_elevation.glist`` shipped
+        alongside each scene's bundle). The result is a compiled ``.scene.hdf``
+        path suitable for passing to :func:`elevation`.
+        """
         sceneName="Elevation"
         sceneObj = SCENE(sceneName).set_properties("vis")
         dummyMat = materials.Material("Dummy", ID="999999")
@@ -68,10 +160,26 @@ def terrain_scene(terrain_bundle_object):
 
 
 def elevation(scene_hdf_path, location_x, location_y):
-    """ Get scene peak and normal vector for ray cast origin: "scene_tool summary /tmp/elevation.scene.hdf"
-    Inputs:
-        - file pat the the compiled scene,
-        - location x and y in scene ENU coordinates
+    """Look up terrain height and surface normal at an (x, y) ENU location.
+
+    Performs a downward raycast from above the scene's bounding box max-Z
+    onto the compiled elevation scene HDF produced by :func:`terrain_scene`.
+
+    Args:
+        scene_hdf_path: Path to the compiled ``.scene.hdf`` from
+            ``terrain_scene()``, which itself was built from an elevation
+            scene glist (see :func:`terrain_scene`).
+        location_x: ENU x coordinate in meters.
+        location_y: ENU y coordinate in meters.
+
+    Returns:
+        tuple ``(height_m, surface_normal_xyz)`` where ``height_m`` is the
+        terrain height at (x, y) and ``surface_normal_xyz`` is a 3-element
+        list giving the unit surface normal at the hit point.
+
+    Raises:
+        RuntimeError: if the raycast finds no terrain at (x, y), typically
+            because the location lies outside the terrain bounds.
     """
     result = subprocess.run(
         ["scene_tool", "summary", scene_hdf_path],
@@ -84,18 +192,40 @@ def elevation(scene_hdf_path, location_x, location_y):
         int(data0[scene_hdf_path]['boxMax'][2]) + 1
     )
 
-    result = subprocess.run(
-            ["scene_tool", "raycast", "--origin", str(location_x), str(location_y), originAlt, "--direction", "0", "0", "-1", scene_hdf_path],
+    def _raycast_z(x, y):
+        out = subprocess.run(
+            ["scene_tool", "raycast", "--origin", str(x), str(y), originAlt, "--direction", "0", "0", "-1", scene_hdf_path],
             capture_output=True,
             text=True,
             env=os.environ,
         )
-    data = json.loads(result.stdout)
-    
-    locationZ = data[0]['hitPosition'][2]
-    
-    surfaceNormal = data[0]['hitNormal']
-    
+        hits = json.loads(out.stdout)
+        if not hits:
+            return None
+        return hits[0]['hitPosition'][2]
+
+    locationZ = _raycast_z(location_x, location_y)
+    if locationZ is None:
+        raise RuntimeError(
+            f"Terrain raycast failed at coordinates ({location_x}, {location_y}). "
+            f"No terrain geometry found at this location. "
+            f"This may indicate that the object is positioned outside the terrain bounds "
+            f"or the terrain geometry is missing from the scene."
+        )
+
+    # The new scene_tool raycast no longer reports a hit normal, so derive it
+    # from a forward-difference over two neighbouring samples. Falls back to
+    # straight-up [0, 0, 1] if either neighbour misses the terrain.
+    eps = 1.0
+    zx = _raycast_z(location_x + eps, location_y)
+    zy = _raycast_z(location_x, location_y + eps)
+    if zx is None or zy is None:
+        surfaceNormal = [0.0, 0.0, 1.0]
+    else:
+        nx, ny, nz = -(zx - locationZ) / eps, -(zy - locationZ) / eps, 1.0
+        norm = (nx * nx + ny * ny + nz * nz) ** 0.5
+        surfaceNormal = [nx / norm, ny / norm, nz / norm]
+
     return locationZ, surfaceNormal
 
 
@@ -111,9 +241,16 @@ def align_directions(target_direction, source_direction, units="radians"):
     # surfaceNormal = surfaceNormal / np.linalg.norm(surfaceNormal)
     
     rotationAxis = np.cross(objNormal, surfaceNormal)
-    rotationAngle = np.arccos(np.dot(objNormal, surfaceNormal))
-    rotation = Rotation.from_rotvec(rotationAxis * rotationAngle)
-    eulerAngles = rotation.as_euler('xyz') #radians
+    axisNorm = np.linalg.norm(rotationAxis)
+    if axisNorm < 1e-9:
+        # Vectors are parallel (or antiparallel). For our terrain alignment
+        # use case the parallel case is the only realistic one, so a zero
+        # rotation is the correct answer.
+        eulerAngles = np.array([0.0, 0.0, 0.0])
+    else:
+        rotationAngle = np.arccos(np.clip(np.dot(objNormal, surfaceNormal), -1.0, 1.0))
+        rotation = Rotation.from_rotvec(rotationAxis / axisNorm * rotationAngle)
+        eulerAngles = rotation.as_euler('xyz') #radians
     if units == "degrees":
          eulerAngles = [a*180/np.pi for a in eulerAngles]
 
@@ -122,8 +259,9 @@ def align_directions(target_direction, source_direction, units="radians"):
     
 if __name__ == "__main__":
 
-    #elevationGListPath = Path("/workspaces/dirsig-channel/data/local/dirsig-shared/Sierra_Nevada/bundles/terrain/elevation.glist")
-    #elevationGListPath = Path("/workspaces/dirsig-channel/data/local/dirsig-shared/Desert_Highway_v2/geometry/Terrain_elevation.glist")
+    # Example: see terrain_scene/elevation docstrings for the input contract.
+    # An "elevation scene glist" is a one-object glist whose base geometry
+    # is a terrain heightmap (e.g. terrain_elevation.glist below).
     elevationGListPath = Path("/workspaces/dirsig-channel/data/local/dirsig-shared/LWIR_Urban_Alt/geometry/terrain_elevation.glist")
     
     baseGeometry = glist.GlistBaseGeometry(elevationGListPath)

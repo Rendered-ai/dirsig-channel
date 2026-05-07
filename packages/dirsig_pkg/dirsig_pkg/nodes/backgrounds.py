@@ -26,7 +26,12 @@ from dirfm.scene import SCENE
 from dirfm import materials
 from dirfm import frames
 from dirfm.glist import DynamicInstance
-from dirsig_pkg.lib.scene_utils import terrain_scene, elevation, align_directions
+from dirsig_pkg.lib.scene_utils import (
+    terrain_scene,
+    elevation,
+    align_directions,
+    patch_glist_split_beziercurvesets,
+)
 from dirsig_pkg.lib.object import AnaDirsigObject, file_to_objgen
 from itertools import count
 
@@ -34,19 +39,23 @@ logger = logging.getLogger(__name__)
 Counter = count(0)
 
 
-def scene(scene_objects, location=(0, 0, 0), meta={}, tags=[]):
-    """Create a dictionary for a scene.
-        Output:
-        - scene objects
-        - scene group timezone
-        - scene metadata
+def scene(scene_objects, location=(0, 0, 0), offsets=None, meta={}, tags=[]):
+    """Create a dictionary for a scene bundle.
+
+    Output bundle fields:
+      - sceneObjects: list of dirfm SCENE objects (one or more for tiled scenes)
+      - offsets: list of [x, y, z] meter offsets, one per sceneObject. None
+        means "register each scene at the origin" (legacy single-scene behavior).
+      - timezone: estimate based on the geodetic location longitude
+      - metadata, tags: passthrough
     """
 
     # An estimate to find the correct time zone based on position
     timezone = round(float(location.get_pos()[1])/15)
-    
+
     bundle = {
         "sceneObjects": scene_objects,
+        "offsets": offsets,
         "timezone": timezone,
         "metadata": meta,
         "tags": tags}
@@ -169,30 +178,53 @@ class SierraNevada(Node):
         return scene([sceneObj], location=location, meta=metadata, tags=names)
 
 
-class DesertHighwayScene(Node):
+# Desert Highway tile presets. Each entry is
+# (suffix, flip_x, flip_y, [offset_x, offset_y, 0]). The center tile is always
+# first; perimeter tiles flip the geometry about an axis to break visible
+# repetition where adjacent tiles meet. The 6000 m offset matches the scene's
+# 6 km × 6 km footprint.
+_DESERT_TILE_SIZE = 6000
+_DESERT_TILE_PRESETS = {
+    "1": [
+        ("C", False, False, [0, 0, 0]),
+    ],
+    "3 (N/S)": [
+        ("C", False, False, [0, 0, 0]),
+        ("N", False, True,  [0,  _DESERT_TILE_SIZE, 0]),
+        ("S", False, True,  [0, -_DESERT_TILE_SIZE, 0]),
+    ],
+    "9 (3x3)": [
+        ("C",  False, False, [0, 0, 0]),
+        ("N",  False, True,  [0,  _DESERT_TILE_SIZE, 0]),
+        ("S",  False, True,  [0, -_DESERT_TILE_SIZE, 0]),
+        ("E",  True,  False, [ _DESERT_TILE_SIZE, 0, 0]),
+        ("W",  True,  False, [-_DESERT_TILE_SIZE, 0, 0]),
+        ("NE", True,  True,  [ _DESERT_TILE_SIZE,  _DESERT_TILE_SIZE, 0]),
+        ("NW", True,  True,  [-_DESERT_TILE_SIZE,  _DESERT_TILE_SIZE, 0]),
+        ("SE", True,  True,  [ _DESERT_TILE_SIZE, -_DESERT_TILE_SIZE, 0]),
+        ("SW", True,  True,  [-_DESERT_TILE_SIZE, -_DESERT_TILE_SIZE, 0]),
+    ],
+}
+
+
+def _build_desert_geometry(geom_path, mml, add_brush, anchor_name="terrain", flip_x=False, flip_y=False):
+    """Assemble the Desert Highway tile geometry GLIST.
+
+    Geometry is centered at the scene origin (extents ~[-3000, 3000] m on
+    each axis) by translating each piece by [-3000, -3000, 0] from the raw
+    asset coordinates. When flip_x or flip_y is set, the entire tile is
+    mirrored via a StaticInstance scale wrapper, which lets adjacent tiles
+    join without visible repetition.
     """
-    7.8km x 6.0 km
-    """
-
-    def exec(self):
-        logger.info("Executing {}".format(self.name))
-
-        from dirsig_pkg.lib.materials_large_desert import mml
-
-        geom_path = (
-            Path(get_volume_path("dirsig_pkg", "dirsig-shared:Desert_Highway_v2")) / "geometry"
-        )
-        anchorName = "terrain"
-        desert = (
-            glist.GLIST()
-            .add_object(
+    desert = glist.GLIST()
+    desert.add_object(
                 glist.Object(
                     glist.GlistBaseGeometry(
                         glist.GLIST("Terrain.glist")
                         .add_object(
                             glist.Object(
                                 glist.Wavefront(geom_path / "obj" / "Terrain.obj"),
-                                glist.StaticInstance(anchorName,scale=[1000, 1000, 1000]),
+                                glist.StaticInstance(anchor_name, scale=[1000, 1000, 1000]),
                             )
                         )
                         .add_object(
@@ -205,171 +237,247 @@ class DesertHighwayScene(Node):
                     glist.StaticInstance(translation=[-3000,-3000,0]),
                 )
             )
-            .add_object(
-                glist.Object(
-                    glist.GlistBaseGeometry(
-                        glist.GLIST("Grass.glist").add_object(
-                            glist.Object(
-                                glist.Wavefront(geom_path / "obj" / "Grass_01.obj"),
-                                glist.Wavefront(geom_path / "obj" / "Grass_02.obj"),
-                                glist.Wavefront(geom_path / "obj" / "Grass_03.obj"),
-                                glist.StaticInstanceBinaryFile(
-                                    geom_path / "generated" / "Grass.instances"
-                                ),
-                            )
-                            .add_material_variant(
-                                "Blade00",
-                                mml["Dry-Grass-0000"],
-                                mml["Dry-Grass-0001"],
-                                mml["Dry-Grass-0002"],
-                                mml["Dry-Grass-0003"],
-                                mml["Dry-Grass-0004"],
-                                mml["Dry-Grass-0005"],
-                                mml["Dry-Grass-0006"],
-                                mml["Dry-Grass-0007"],
-                            )
-                            .add_material_variant(
-                                "Blade01",
-                                mml["Dry-Grass-0000"],
-                                mml["Dry-Grass-0001"],
-                                mml["Dry-Grass-0002"],
-                                mml["Dry-Grass-0003"],
-                                mml["Dry-Grass-0004"],
-                                mml["Dry-Grass-0005"],
-                                mml["Dry-Grass-0006"],
-                                mml["Dry-Grass-0007"],
-                            )
-                            .add_material_variant(
-                                "Blade02",
-                                mml["Dry-Grass-0000"],
-                                mml["Dry-Grass-0001"],
-                                mml["Dry-Grass-0002"],
-                                mml["Dry-Grass-0003"],
-                                mml["Dry-Grass-0004"],
-                                mml["Dry-Grass-0005"],
-                                mml["Dry-Grass-0006"],
-                                mml["Dry-Grass-0007"],
-                            )
-                            .add_material_variant(
-                                "Blade03",
-                                mml["Dry-Grass-0000"],
-                                mml["Dry-Grass-0001"],
-                                mml["Dry-Grass-0002"],
-                                mml["Dry-Grass-0003"],
-                                mml["Dry-Grass-0004"],
-                                mml["Dry-Grass-0005"],
-                                mml["Dry-Grass-0006"],
-                                mml["Dry-Grass-0007"],
-                            )
-                            .add_material_variant(
-                                "Blade04",
-                                mml["Dry-Grass-0000"],
-                                mml["Dry-Grass-0001"],
-                                mml["Dry-Grass-0002"],
-                                mml["Dry-Grass-0003"],
-                                mml["Dry-Grass-0004"],
-                                mml["Dry-Grass-0005"],
-                                mml["Dry-Grass-0006"],
-                                mml["Dry-Grass-0007"],
-                            )
+
+    desert.add_object(
+            glist.Object(
+                glist.GlistBaseGeometry(
+                    glist.GLIST("Grass.glist").add_object(
+                        glist.Object(
+                            glist.Wavefront(geom_path / "obj" / "Grass_01.obj"),
+                            glist.Wavefront(geom_path / "obj" / "Grass_02.obj"),
+                            glist.Wavefront(geom_path / "obj" / "Grass_03.obj"),
+                            glist.StaticInstanceBinaryFile(
+                                geom_path / "generated" / "Grass.instances"
+                            ),
                         )
-                    ),
-                    glist.StaticInstance(translation=[-3000,-3000,0]),
-                )
+                        .add_material_variant(
+                            "Blade00",
+                            mml["Dry-Grass-0000"],
+                            mml["Dry-Grass-0001"],
+                            mml["Dry-Grass-0002"],
+                            mml["Dry-Grass-0003"],
+                            mml["Dry-Grass-0004"],
+                            mml["Dry-Grass-0005"],
+                            mml["Dry-Grass-0006"],
+                            mml["Dry-Grass-0007"],
+                        )
+                        .add_material_variant(
+                            "Blade01",
+                            mml["Dry-Grass-0000"],
+                            mml["Dry-Grass-0001"],
+                            mml["Dry-Grass-0002"],
+                            mml["Dry-Grass-0003"],
+                            mml["Dry-Grass-0004"],
+                            mml["Dry-Grass-0005"],
+                            mml["Dry-Grass-0006"],
+                            mml["Dry-Grass-0007"],
+                        )
+                        .add_material_variant(
+                            "Blade02",
+                            mml["Dry-Grass-0000"],
+                            mml["Dry-Grass-0001"],
+                            mml["Dry-Grass-0002"],
+                            mml["Dry-Grass-0003"],
+                            mml["Dry-Grass-0004"],
+                            mml["Dry-Grass-0005"],
+                            mml["Dry-Grass-0006"],
+                            mml["Dry-Grass-0007"],
+                        )
+                        .add_material_variant(
+                            "Blade03",
+                            mml["Dry-Grass-0000"],
+                            mml["Dry-Grass-0001"],
+                            mml["Dry-Grass-0002"],
+                            mml["Dry-Grass-0003"],
+                            mml["Dry-Grass-0004"],
+                            mml["Dry-Grass-0005"],
+                            mml["Dry-Grass-0006"],
+                            mml["Dry-Grass-0007"],
+                        )
+                        .add_material_variant(
+                            "Blade04",
+                            mml["Dry-Grass-0000"],
+                            mml["Dry-Grass-0001"],
+                            mml["Dry-Grass-0002"],
+                            mml["Dry-Grass-0003"],
+                            mml["Dry-Grass-0004"],
+                            mml["Dry-Grass-0005"],
+                            mml["Dry-Grass-0006"],
+                            mml["Dry-Grass-0007"],
+                        )
+                    )
+                ),
+                glist.StaticInstance(translation=[-3000,-3000,0]),
             )
-            .add_object(
-                glist.Object(
-                    glist.GlistBaseGeometry(
-                        glist.GLIST("Shrubs.glist").add_object(
-                            glist.Object(
-                                glist.GlistBaseGeometry(
-                                    geom_path
-                                    / "bundles"
-                                    / "Restio_eleocharis"
-                                    / "Restio_eleocharis.glist"
-                                ),
-                                #glist.GlistBaseGeometry(
-                                #    geom_path
-                                #    / "bundles"
-                                #    / "Euclea_racemosa"
-                                #    / "Euclea_racemosa.glist"
-                                #),
-                                glist.Wavefront(geom_path / "obj" / "Brush_01.obj"),
-                                glist.Wavefront(geom_path / "obj" / "Brush_02.obj"),
-                                glist.StaticInstanceBinaryFile(
-                                    geom_path / "generated" / "Shrubs.instances"
-                                ),
-                            )
+        )
+    desert.add_object(
+            glist.Object(
+                glist.GlistBaseGeometry(
+                    glist.GLIST("BigRocks.glist").add_object(
+                        glist.Object(
+                            glist.Wavefront(geom_path / "obj" / "BigRock_01.obj"),
+                            glist.Wavefront(geom_path / "obj" / "BigRock_02.obj"),
+                            glist.StaticInstanceBinaryFile(
+                                geom_path / "generated" / "BigRocks.instances"
+                            ),
                         )
-                    ),
-                    glist.StaticInstance(translation=[-3000,-3000,0]),
-                )
+                    )
+                ),
+                glist.StaticInstance(translation=[-3000,-3000,0]),
             )
-            .add_object(
+        )
+    
+    if add_brush:
+        brushObject = glist.GlistBaseGeometry(
+            glist.GLIST("Shrubs.glist").add_object(
                 glist.Object(
                     glist.GlistBaseGeometry(
-                        glist.GLIST("BigRocks.glist").add_object(
-                            glist.Object(
-                                glist.Wavefront(geom_path / "obj" / "BigRock_01.obj"),
-                                glist.Wavefront(geom_path / "obj" / "BigRock_02.obj"),
-                                glist.StaticInstanceBinaryFile(
-                                    geom_path / "generated" / "BigRocks.instances"
-                                ),
-                            )
-                        )
+                        geom_path / "bundles" / "Restio_eleocharis" / "Restio_eleocharis.glist"
                     ),
-                    glist.StaticInstance(translation=[-3000,-3000,0]),
+                    glist.GlistBaseGeometry(
+                        geom_path / "bundles" / "Euclea_racemosa" / "Euclea_racemosa.glist"
+                    ),
+                    glist.Wavefront(geom_path / "obj" / "Brush_01.obj"),
+                    glist.Wavefront(geom_path / "obj" / "Brush_02.obj"),
+                    glist.StaticInstanceBinaryFile(
+                        geom_path / "generated" / "Shrubs.instances"
+                    ),
                 )
             )
         )
 
+        desert.add_object(
+            glist.Object(
+                brushObject,
+                glist.StaticInstance(translation=[-3000,-3000,0]),
+            )
+        )
+
+    if not (flip_x or flip_y):
+        return desert
+
+    # Mirror the entire tile by wrapping in a StaticInstance with a
+    # negative scale on the requested axis. Geometry is centered at the
+    # scene origin, so the mirror is in-place.
+    scale = [-1 if flip_x else 1, -1 if flip_y else 1, 1]
+    flipped = glist.GLIST()
+    flipped.add_object(
+        glist.Object(
+            glist.GlistBaseGeometry(desert),
+            glist.StaticInstance(scale=scale),
+        )
+    )
+    return flipped
+
+
+class DesertHighwayScene(Node):
+    """6 km x 6 km desert highway scene at La Mancha, Spain (39.593 N, -2.1015 E).
+
+    Inputs:
+      - Objects: optional list of objects to place on the (center) tile.
+      - Road Type: "Paved" or "Dirt" — selects the road body material.
+      - Add Brush: "True" / "False" / "<random>" — toggles desert shrub vegetation.
+      - Scene Tiles: tile preset for larger-FOV simulation. "1" is a single
+        6x6 km tile; "3 (N/S)" extends north and south to 6x18 km;
+        "9 (3x3)" produces an 18x18 km area. Perimeter tiles are mirrored
+        copies of the center tile (no objects), used to extend scenery.
+    """
+
+    def exec(self):
+        logger.info("Executing {}".format(self.name))
+
+        road_type = self.inputs.get('Road Type', ['Paved'])[0]
+        scene_tiles = self.inputs.get('Scene Tiles', ['1'])[0]
+
+        # Resolve Add Brush ("<random>" → ctx-seeded True/False)
+        add_brush_input = self.inputs['Add Brush'][0]
+        if add_brush_input == '<random>':
+            add_brush = bool(ctx.random.choice([True, False]))
+        else:
+            add_brush = (add_brush_input == "True")
+
+        from dirsig_pkg.lib.materials_large_desert import create_mml
+        mml = create_mml(road_type=road_type)
+
+        geom_path = (
+            Path(get_volume_path("dirsig_pkg", "dirsig-shared:Desert_Highway_v2")) / "geometry"
+        )
+        anchor_name = "terrain"
         location = frames.GeodeticFrame(39.593, -2.1015, 0)
-        sceneObj = (
-            SCENE("solar")
-            .set_origin(location)
-            .set_properties("vis,nir,swir,mwir,lwir")
-            .add_geometry("Terrain", desert)
-        )
 
-        for key in mml.keys():
-            sceneObj.add_material(mml[key])
+        tile_map = _DESERT_TILE_PRESETS.get(scene_tiles)
+        if tile_map is None:
+            logger.warning(
+                "Unknown Scene Tiles preset %r; defaulting to single tile.", scene_tiles
+            )
+            tile_map = _DESERT_TILE_PRESETS["1"]
 
-        metadata={
+        # Build geometry once per (flip_x, flip_y) permutation and reuse.
+        geom_cache = {}
+        sceneList = []
+        offsetList = []
+        names = []
+        objectMetadata = []
+        metadata = {
             'scene description': 'Desert Highway; High Resolution; 6kmx6km',
             'Release Date': 'Pre-release Feb 2024',
+            'Road Type': road_type,
+            'Add Brush': add_brush,
+            'Scene Tiles': scene_tiles,
+            'Tiles': [],
         }
 
         inputObjects = self.inputs['Objects']
-        if inputObjects[0] is None:
-            return scene([sceneObj], location=location, meta=metadata)
-        
-        #Add objects to the scene as a glist
-        names = list()
-        objectMetadata = []        
-        objectGenerators = file_to_objgen(inputObjects, AnaDirsigObject)
-        objectsGList = glist.GLIST()
-        for generator in objectGenerators:
-            anaObject = generator.exec() # trigger the generator
-            objectMetadata.append({
-                "name": anaObject.name,
-                "modifiers": anaObject.modifiers,
-            })
-            objectsGList.add_object(anaObject.root)
-            
-            #Update object's elevation for static instances
-            elevationGListPath = Path(get_volume_path("dirsig_pkg", "dirsig-shared:Desert_Highway_v2/geometry/Terrain_elevation.glist"))
-            align_objects_with_terrain(anaObject, elevationGListPath, anchorName)
+        objectsRequested = inputObjects[0] is not None
 
-            #Collect object instance names for abundance truth collection
-            for objInstance in anaObject.root.get_instances():
-                names.append(objInstance.get_name())
+        for idx, (suffix, fx, fy, offset) in enumerate(tile_map):
+            key = (fx, fy)
+            if key not in geom_cache:
+                geom_cache[key] = _build_desert_geometry(
+                    geom_path, mml, add_brush, anchor_name, flip_x=fx, flip_y=fy,
+                )
+            tile_geom = geom_cache[key]
 
-        sceneObj.add_geometry("Objects", objectsGList)
+            sceneObj = (
+                SCENE(f"desert_{suffix}")
+                .set_origin(location)
+                .set_properties("vis,nir,swir,mwir,lwir")
+                .add_geometry("Terrain", tile_geom)
+            )
+            for k in mml.keys():
+                sceneObj.add_material(mml[k])
 
-        metadata['Object Modifiers'] = objectMetadata
-        
-        return scene([sceneObj], location=location, meta=metadata, tags=names)
-    
+            # Place objects only on the center tile (offset [0,0,0]). Perimeter
+            # tiles are scenery-only — they extend the visible area without
+            # duplicating object placements.
+            if idx == 0 and objectsRequested:
+                objectGenerators = file_to_objgen(inputObjects, AnaDirsigObject)
+                objectsGList = glist.GLIST()
+                elevationGListPath = Path(get_volume_path(
+                    "dirsig_pkg",
+                    "dirsig-shared:Desert_Highway_v2/geometry/Terrain_elevation.glist",
+                ))
+                for generator in objectGenerators:
+                    anaObject = generator.exec()
+                    objectMetadata.append({
+                        "name": anaObject.name,
+                        "modifiers": anaObject.modifiers,
+                    })
+                    objectsGList.add_object(anaObject.root)
+                    align_objects_with_terrain(anaObject, elevationGListPath, anchor_name)
+                    for objInstance in anaObject.root.get_instances():
+                        names.append(objInstance.get_name())
+                sceneObj.add_geometry("Objects", objectsGList)
+                metadata['Object Modifiers'] = objectMetadata
+
+            sceneList.append(sceneObj)
+            offsetList.append(offset)
+            metadata['Tiles'].append({'suffix': suffix, 'offset': offset, 'flip': [fx, fy]})
+
+        return scene(
+            sceneList, location=location, offsets=offsetList, meta=metadata, tags=names,
+        )
+
 
 class LWIRUrbanAltScene(Node):
     """
@@ -699,7 +807,17 @@ class LWIRUrbanAltScene(Node):
                         glist.GLIST("power_line.glist").add_object(
                             glist.Object(
                                 glist.GlistBaseGeometry(
-                                    geom_path / "generated" / "power_line.glist"
+                                    # The bundled power_line.glist packs 3 cubic
+                                    # Bezier curves into each <beziercurveset>
+                                    # with a single <matid>; DIRSIG sizes the
+                                    # per-object materialData array to 1 and
+                                    # then aborts with 'Out of range object
+                                    # material requested!' when shadow rays hit
+                                    # the 2nd or 3rd curve. Patch the asset on
+                                    # stage so each set holds exactly one curve.
+                                    patch_glist_split_beziercurvesets(
+                                        geom_path / "generated" / "power_line.glist"
+                                    )
                                 ),
                                 glist.StaticInstance(),
                             )

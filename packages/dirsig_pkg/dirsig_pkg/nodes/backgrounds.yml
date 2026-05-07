@@ -42,6 +42,26 @@ schemas:
     inputs: 
     - name: Objects
       default: null
+    - name: Road Type
+      default: "Paved"
+      tooltip: Type of road surface
+      select:
+        - "Paved"
+        - "Dirt"
+    - name: Add Brush
+      default: "False"
+      tooltip: Add brush to the scene
+      select:
+        - "<random>"
+        - "True"
+        - "False"
+    - name: Scene Tiles
+      default: "1"
+      tooltip: Tile preset for larger-FOV simulation. Perimeter tiles are mirrored copies of the center tile (no objects); only the center tile carries object placements.
+      select:
+        - "1"
+        - "3 (N/S)"
+        - "9 (3x3)"
     outputs:
     - name: Scene
   

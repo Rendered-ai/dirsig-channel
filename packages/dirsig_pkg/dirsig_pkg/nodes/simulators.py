@@ -28,6 +28,7 @@ import dirfm.atmosphere as atmos
 from dirfm.ephemeris import EphemerisPlugin
 from dirfm import TASKS
 from dirfm.dirsig import DIRSIG
+import dirfm.platform_sensor as ps
 from dirfm.utilities.annotations import AnnotationsMetadata
 from dirsig_pkg.lib.mask import mask_to_annotation
 from spectral import open_image
@@ -46,27 +47,38 @@ class Simulate(Node):
         dirsig = DIRSIG(inPath, outPath)
         dirsig.set_seed(ctx.seed)
 
-        # Register the scene object with DIRSIG API
+        # Register the scene object(s) with DIRSIG API. Tiled scenes pass a list
+        # of sceneObjects with a parallel list of [x, y, z] meter offsets; the
+        # legacy single-scene flow has offsets=None and we register one scene at
+        # the origin.
         sceneBundle = self.inputs["Scene"][0]
         sceneObjects = sceneBundle["sceneObjects"]
-        dirsig.set_scene(sceneObjects[0])
+        offsets = sceneBundle.get("offsets")
+        if offsets is None:
+            offsets = [[0, 0, 0]] * len(sceneObjects)
+        for sceneObject, offset in zip(sceneObjects, offsets):
+            dirsig.add_scene(sceneObject, offset=offset)
 
-        # Register the platform, motion, and tasks with DIRSIG API
+        # Resolve the platform sensor plugin from upstream nodes.
         platform_assets = self.inputs["Sensor"][0]
         platformObject = platform_assets["sensor"]
 
         #Add truth collection to the first focal plane of the first attached instrument
         firstInstrument = [i[0] for i in platformObject.get_instruments().values()][0]
         firstFocalPlane = firstInstrument.get_focalplanes()[0]
-        firstFocalPlane.add_truth_collection("Intersection")
+        if firstFocalPlane._truth_collection is None:
+            captureBasename = firstFocalPlane.get_capture_filename().split('.')[0]
+            firstFocalPlane.set_truth_collection(ps.TruthCollection(f"{captureBasename}-truth"))
+        truthCollection = firstFocalPlane.get_truth_collection_names()
+        
+        if "Intersection" not in truthCollection:
+            firstFocalPlane.add_truth_collection("Intersection")
+        firstFocalPlane.add_truth_collection("material")
         firstFocalPlane.add_truth_collection("Abundance", tags=sceneBundle["tags"])
 
-        dirsig.set_platform(platformObject)
-
         motionObject = platform_assets["motion"]
-        dirsig.set_motion(motionObject)
 
-        # Get reference time and create task list
+        # Get reference time and build the task list.
         datetime_in = self.inputs["Reference Datetime"][0]
         if isinstance(datetime_in, datetime):
             ref_datetime = datetime_in
@@ -79,22 +91,43 @@ class Simulate(Node):
                 )
                 raise
 
+        start_task_time = float(self.inputs["Start Task Time (s)"][0])
         capture_duration = float(self.inputs["Capture Duration (s)"][0])
         if ctx.preview:
             capture_duration = 0
         ref_datetime -= timedelta(hours=sceneBundle["timezone"])
-        logger.info(f"Creating task with reference {ref_datetime} and duration {capture_duration}")
-        tasks = TASKS(ref_datetime).add_start_stop(0, capture_duration)
-        dirsig.set_tasks(tasks)
+        end_task_time = start_task_time + capture_duration
+        logger.info(f"Creating task with reference {ref_datetime}, start time {start_task_time}s, end time {end_task_time}s, duration {capture_duration}s")
+        tasks = TASKS(ref_datetime).add_start_stop(start_task_time, end_task_time)
+
+        # New plugins API: motion and tasks live on the platform plugin itself,
+        # and the platform is registered through dirsig.add_plugin.
+        platformObject.set_motion(motionObject).set_tasks(tasks)
+        dirsig.add_plugin(platformObject)
 
         ephemerisPlugin = self.inputs["Ephemeris"][0]
         if isinstance(ephemerisPlugin, EphemerisPlugin):
-            dirsig.set_ephemeris(ephemerisPlugin)
+            dirsig.add_plugin(ephemerisPlugin)
 
-        atm = atmos.BasicAtmosphere()
+        atm = atmos.BasicAtmospherePlugin()
         atm.set_radiative_transfer(atmos.SimpleRadiativeTransfer(250))
         atm.set_weather(Path("$DIRSIG_HOME/lib/data/weather/jun2392.wth"))
-        dirsig.set_atmosphere(atm)
+        dirsig.add_plugin(atm)
+
+        # Collect scene metadata for the dataset annotations
+        sceneMetadata = sceneBundle['metadata']
+        sceneMetadata['capture_time'] = ref_datetime.isoformat()
+    
+        ephemerisData = {}
+        if isinstance(ephemerisPlugin, EphemerisPlugin):
+            ephemerisData['type'] = f"{ephemerisPlugin.get_plugin_name()}"
+            ephemerisData['inputs'] = f"{ephemerisPlugin.get_plugin_inputs()}"
+        else:
+            ephemerisData['type'] = f"{ephemerisPlugin}"
+            ephemerisData['inputs'] = None
+        sceneMetadata['ephemeris'] = ephemerisData
+
+        sceneMetadata['atmosphere'] = atm.get_metadata()
 
         # Run the simulation
         if "debug" in ctx.output:
@@ -111,7 +144,13 @@ class Simulate(Node):
                 for fp in inst.get_focalplanes():
                     #Get dirsig output files, these vary based on the platform's file scheduler
                     filebase = fp.get_capture_filename().split('.')[0]
-                    truthfilebase = fp.get_truth_filename().split('.')[0]
+                    truthFilename = fp.get_truth_filename()
+                    if truthFilename is None:
+                        truthfilebase = 'dummytruth'
+                    else:
+                        truthfilebase = truthFilename.split('.')[0]
+
+                    #Get dirsig output files, these vary based on the platform's file scheduler
                     for dirsigout in glob(str(outPath) + '/' + filebase + '*'):
                         if truthfilebase in dirsigout or dirsigout.endswith('hdr'):
                             continue
@@ -136,10 +175,19 @@ class Simulate(Node):
                             previewFilepath = os.path.join(ctx.output, "preview.png")
                             shutil.copy(rgbFilepath, previewFilepath)
                             return {}
-                                            
+
+                        if self.inputs['Save Radiance'][0] == "True":
+                            os.makedirs(ctx.output + "/radiance", exist_ok=True)
+                            shutil.copy(enviFilePath, ctx.output + "/radiance/" + enviFileName)
+                            shutil.copy(enviFilePath + ".hdr", ctx.output + "/radiance/" + enviFileName + ".hdr")
+                        
                         truthFilePath = dirsigout.replace(filebase, truthfilebase)
                         if os.path.exists(truthFilePath):
-                            sceneMetadata = sceneBundle['metadata']
+                            if self.inputs['Save ENVI Truth'][0]=="True":
+                                os.makedirs(ctx.output + "/envi_truth", exist_ok=True)
+                                shutil.copy(truthFilePath, ctx.output + "/envi_truth/" + truthFilePath.split('/')[-1])
+                                shutil.copy(truthFilePath + ".hdr", ctx.output + "/envi_truth/" + truthFilePath.split('/')[-1] + ".hdr")
+                            
                             anno = AnnotationsMetadata(rgbFileName, sceneMetadata=sceneMetadata)
                             
                             truthHeaderPath =  truthFilePath + ".hdr"
@@ -153,7 +201,23 @@ class Simulate(Node):
                                 objectType = "_".join([tok for tok in name.split("_") if not tok.isdigit()])
                                 mask = img_data.read_band(idx)
                                 annotation = mask_to_annotation(mask)
-                                if annotation["bbox"]:
+                                if not annotation.get("bbox"):
+                                    continue
+
+                                # Use the single bbox from mask_to_annotation for the entire mask
+                                # Include all segments in the annotation if they exist
+                                segments = annotation.get("segments", [])
+                                if segments:
+                                    # Use original bbox and include all segments
+                                    entry = {
+                                        "bbox": annotation["bbox"],
+                                        "segmentation": annotation["segmentation"],
+                                        "segmentation_fill": annotation["segmentation_fill"],
+                                        "segments": segments
+                                    }
+                                    anno.add_entry(name=name, type=objectType, **entry)
+                                else:
+                                    # Single-object case without segments
                                     anno.add_entry(name=name, type=objectType, **annotation)
 
                             anno_dir = Path(ctx.output) / "annotations"

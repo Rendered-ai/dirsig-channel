@@ -33,6 +33,13 @@ schemas:
         oneOf:
         - type: string
         - numLinks: one
+    - name: Start Task Time (s)
+      description: Set the start time of the task
+      default: 0.0
+      validation:
+        oneOf:
+          - type: float
+          - numLinks: one
     - name: Capture Duration (s)
       description: Set the flight time
       default: 0.0
@@ -45,4 +52,10 @@ schemas:
         oneOf:
         - type: string
         - numLinks: one
+    - name: Save Radiance
+      default: "False"
+      select: ["True", "False"]
+    - name: Save ENVI Truth
+      default: "False"
+      select: ["True", "False"]
     outputs: []

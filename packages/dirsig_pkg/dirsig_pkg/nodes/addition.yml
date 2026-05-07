@@ -1,0 +1,19 @@
+schemas:
+  Addition:
+    alias: Addition
+    tooltip: Adds two numbers together. Inputs can be strings, numbers, or links from other nodes.
+    category: Common
+    subcategory: Values
+    color: '#B3B3B3'
+    inputs:
+    - name: Input A
+      description: First number to add (can be string, number, or link)
+      default: 0
+      link: true
+    - name: Input B
+      description: Second number to add (can be string, number, or link)
+      default: 0
+      link: true
+    outputs:
+    - name: Sum
+      description: The result of adding Input A and Input B

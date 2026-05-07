@@ -187,14 +187,37 @@ class CustomRGBSensor(Node):
     def exec(self):
         logger.info("Executing {}".format(self.name))
 
+        # Parse truth bands from comma-separated list
+        truthBands = [band.strip() for band in self.inputs["Truth Bands"][0].split(',') if band.strip()]
+        
         pixels = fmt_VecNum(self.inputs["Pixels"][0])
         pitch = fmt_VecNum(self.inputs["Pixel Pitch"][0])
         focal_length = float(self.inputs["Focal Length"][0])
+        detectorClockRate = float(self.inputs['Detector Clock Rate (Hz)'][0])
+        schedule = self.inputs['File Schedule'][0]
+        if ctx.preview:
+            schedule = "simulation"
+            
+        # Get mount orientation parameter
+        mount_orientation = self.inputs.get('Mount Orientation', ['Down'])[0]
+            
+        # Create a truth collection object with schedule parameter
+        truthCollection = ps.TruthCollection("{:010d}-{}".format(ctx.interp_num,"CustomRGBTruth"), schedule=schedule)
+        
+        # Add each specified truth band to the collection
+        for truth_band in truthBands:
+            truthCollection.add_collection(truth_band)
 
-        sensor = ps.PlatformSensor().add_attachment(
+        # Determine mount rotation based on orientation
+        if mount_orientation == "Forward":
+            mount_rotation = (90, 0, 0)
+        else:  # Default "Down" orientation
+            mount_rotation = (0, 0, 0)
+
+        sensor = ps.PlatformSensorPlugin().add_attachment(
             ps.Attachment(
                 ps.StaticMount("Mount").set_rotation(
-                    "xyz", "degrees", 0, 0, 0
+                    "xyz", "degrees", mount_rotation[0], mount_rotation[1], mount_rotation[2]
                 )
             ).add_attachment(
                 ps.Attachment(
@@ -209,7 +232,7 @@ class CustomRGBSensor(Node):
                         .set_capture_method(
                             ps.BasicCaptureMethod("Simple")
                             .set_image_file(
-                                ps.ImageFile("{:010d}-{}".format(ctx.interp_num,"CustomRGB"))
+                                ps.ImageFile("{:010d}-{}".format(ctx.interp_num,"CustomRGB"), schedule=schedule)
                             )
                             .set_temporal_integration(0, 10)
                             .set_spectral_response(
@@ -225,6 +248,7 @@ class CustomRGBSensor(Node):
                                         "Red",
                                         0.65,
                                         0.1,
+                                        func_type="wymanx",
                                     )
                                 )
                                 .add_channel(
@@ -232,6 +256,7 @@ class CustomRGBSensor(Node):
                                         "Green",
                                         0.55,
                                         0.1,
+                                        func_type="wymany",
                                     )
                                 )
                                 .add_channel(
@@ -239,13 +264,14 @@ class CustomRGBSensor(Node):
                                         "Blue",
                                         0.45,
                                         0.1,
+                                        func_type="wymanz",
                                     )
                                 )
                             )
                         )
                         .set_detector_array(
                             ps.DetectorArray("microns")
-                            .set_clock(ps.IndependentDetectorClock(1000.0, 0))
+                            .set_clock(ps.IndependentDetectorClock(detectorClockRate, 0))
                             .set_elements(
                                 pixels[0],
                                 pixels[1],
@@ -258,7 +284,7 @@ class CustomRGBSensor(Node):
                                 False,
                                 True,
                             )
-                        ).set_truth_collection(ps.TruthCollection("{:010d}-{}".format(ctx.interp_num,"CustomRGBTruth")))
+                        ).set_truth_collection(truthCollection)
                     )
                 )
             )
@@ -269,7 +295,7 @@ class CustomRGBSensor(Node):
         sensorAssets = {
             'sensor': sensor,
             'motion': motion,
-            'convert_args': ["--bands=0, 1, 2", "--percent=2"],
+            'convert_args': ["--bands=0,1,2", "--percent=2", "--xyztorgb", "--tonemap=srgb"],
         }
         return {"Sensor": sensorAssets}
 
@@ -310,6 +336,10 @@ class ThermalSensor(Node):
 
         # Get shutter speed from node input
         integration_time = float(self.inputs['Shutter Speed (s)'][0])
+        
+        # Get mount orientation parameter
+        mount_orientation = self.inputs.get('Mount Orientation', ['Down'])[0]
+        
         instrument = thermal_sensor(
             band_limits=band_limits,
             resolution=pixels,
@@ -321,9 +351,16 @@ class ThermalSensor(Node):
             psf=psf,
             integration_time=integration_time,
         )
-        mountAttachment = ps.Attachment(ps.StaticMount("Static Mount"))
+        
+        # Determine mount rotation based on orientation
+        if mount_orientation == "Forward":
+            mount_rotation = (90, 0, 0)
+        else:  # Default "Down" orientation
+            mount_rotation = (0, 0, 0)
+            
+        mountAttachment = ps.Attachment(ps.StaticMount("Static Mount").set_rotation("xyz", "degrees", mount_rotation[0], mount_rotation[1], mount_rotation[2]))
         mountAttachment.add_attachment(ps.Attachment(instrument))
-        sensor = ps.PlatformSensor().add_attachment(mountAttachment)
+        sensor = ps.PlatformSensorPlugin().add_attachment(mountAttachment)
     
         motion = self.inputs['Flex Motion'][0]
         sensorAssets = {
@@ -332,4 +369,103 @@ class ThermalSensor(Node):
             'convert_args': [],
         }
         return {"Sensor": sensorAssets}
+
     
+class AltumPT(Node):
+
+    def exec(self):
+        logger.info("Executing {}".format(self.name))
+
+        resolution = fmt_VecNum(self.inputs["Resolution"][0])
+
+        rgb_only = self.inputs["RGB Only"][0]=='True'
+
+        add_pan = self.inputs["Add PAN"][0]=='True'
+
+        detectorClockRate = self.inputs['Detector Clock Rate (Hz)'][0]
+
+        schedule = self.inputs['File Schedule'][0]
+        if ctx.preview:
+            schedule = "simulation"
+        
+        # Get override focal length parameter - use None if set to default 0.0
+        override_focal_length = None
+        if 'Override Focal Length (mm)' in self.inputs:
+            focal_value = float(self.inputs['Override Focal Length (mm)'][0])
+            if focal_value != 0.0:  # 0.0 means use defaults
+                override_focal_length = focal_value
+
+        # Get mount orientation parameter
+        mount_orientation = self.inputs.get('Mount Orientation', ['Down'])[0]
+
+        truthBands = []
+        truthBands.append("Intersection")
+        sensor = altumPT_sensor(
+            resolution=resolution, 
+            truth_bands=truthBands, 
+            rgb_only=rgb_only,
+            add_pan=add_pan,
+            use_real_integration_times=True,
+            detector_clock_rate=detectorClockRate, 
+            schedule=schedule,
+            override_focal_length=override_focal_length,
+            mount_orientation=mount_orientation,
+        )
+
+        motion = self.inputs['Flex Motion'][0]
+        
+        sensorAssets = {
+            'sensor': sensor,
+            'motion': motion,
+            'convert_args': ["--band=2"],
+        }
+        return {"Sensor": sensorAssets}
+
+
+class ElectroOptical(Node):
+
+    def exec(self):
+        logger.info("Executing {}".format(self.name))
+
+        resolution = fmt_VecNum(self.inputs["Resolution"][0])
+
+        detectorClockRate = self.inputs['Detector Clock Rate (Hz)'][0]
+
+        schedule = self.inputs['File Schedule'][0]
+        if ctx.preview:
+            schedule = "simulation"
+
+        override_focal_length = None
+        if 'Override Focal Length (mm)' in self.inputs:
+            focal_value = float(self.inputs['Override Focal Length (mm)'][0])
+            if focal_value != 0.0:
+                override_focal_length = focal_value
+
+        mount_orientation = self.inputs.get('Mount Orientation', ['Down'])[0]
+
+        truthBands = []
+        collect_truth = self.inputs.get('Collect Truth', ['True'])[0] == 'True'
+        if collect_truth:
+            truthBands.append("Intersection")
+        sensor = altumPT_sensor(
+            resolution=resolution,
+            truth_bands=truthBands,
+            rgb_only=False,
+            add_pan=True,
+            pan_only=True,
+            use_real_integration_times=True,
+            detector_clock_rate=detectorClockRate,
+            schedule=schedule,
+            override_focal_length=override_focal_length,
+            mount_orientation=mount_orientation,
+            sensor_name="EO",
+        )
+
+        motion = self.inputs['Flex Motion'][0]
+
+        sensorAssets = {
+            'sensor': sensor,
+            'motion': motion,
+            'convert_args': ["--band=0"],
+        }
+        return {"Sensor": sensorAssets}

@@ -126,7 +126,6 @@ class LookAtOrientationEngine(Node):
 
         return {"OrientationEngine": oe}
 
-# BUG: Velocity will cause an error if task start and stop are both 0 as the object never moves so it never gets a velocity
 class VelocityOrientationEngine(Node):
     """ """
     def exec(self):

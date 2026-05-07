@@ -68,8 +68,13 @@ add_nodes:
 
 
 remotes:
-  - channelId: 246c5c77-b128-485f-b178-2596023f6c59
-    name: dirsig-open-v0.2
+  - channelId: 77830327-3c31-4b28-8d41-9922e809fb4f
+    name: dirsig-open-QA
     description: Use DIRSIG for generating synthetic data on Rendered.ai.
-    instance: c6a.8xlarge
+    instance: c7a.8xlarge
+    timeout: 3600
+  - channelId: 6ed81eef-0c3f-4127-a0ed-9ac98bba92e8
+    name: dirsig-open-v0.3
+    description: "Starter channel with example graphs for DIRSIG synthetic data generation."
+    instance: c7a.8xlarge
     timeout: 3600

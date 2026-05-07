@@ -19,9 +19,13 @@ schemas:
           - numLinks: one
     - name: Number of Objects
       description: How many object to place
-      default: 1
+      default: 1.0
     - name: Radius (m)
       description: Extent of cluster
-      default: 1.0
+      default: 10.0
+    - name: Prevent Overlap
+      description: Prevent objects from overlapping
+      default: "True"
+      select: ["True", "False"]
     outputs:
     - name: Objects

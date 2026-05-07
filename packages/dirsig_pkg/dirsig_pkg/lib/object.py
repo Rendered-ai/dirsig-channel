@@ -131,13 +131,13 @@ class AnaDirsigObject(AnaBaseObject):
             objFilePath = glist_fPath.parents[0] / objFilename
             
             result = subprocess.run(
-                ["object_tool", "--geometry", f"--input_filename={objFilePath}", "--input_format=obj"],
+                ["object_tool", "--geometry", f"--input_filename={objFilePath}"],
                 capture_output=True,
                 text=True,
                 env=os.environ,
             )
-            
             sizeLine = [l for l in result.stdout.splitlines() if "Size = " in l][0]
+            
             for value in sizeLine.split():
                 try:
                     self._size.append(float(value))
@@ -176,11 +176,12 @@ class AnaDirsigObject(AnaBaseObject):
 
 def filename_to_generator(filename, object_class):
     # create an object generator that uses filename as its source
-    _, ext = os.path.splitext(filename)
+    rootname, ext = os.path.splitext(filename)
     if ext != ".glist":
         logger.info(f"File type of '{ext}' not supported")
         return
-    object_type = 'GlistBundle'
+    
+    object_type = os.path.basename(rootname)
     
     wrapped_generator = ObjectDirsigGenerator(
         object_class,
@@ -202,6 +203,13 @@ def file_to_objgen(generators, object_class):
     # return generators
     wrapped_generators = []
     for generator in generators:
+        # Skip placeholders left behind when an upstream link is disconnected
+        # in the editor (the input value becomes None, "", etc., rather than
+        # being absent). Without this guard, callers later attempt
+        # ``generator.exec()`` on a string and crash with an opaque
+        # ``AttributeError: 'str' object has no attribute 'exec'``.
+        if generator is None or isinstance(generator, str):
+            continue
         if isinstance(generator, FileObject):
             gen = filename_to_generator(generator.filename, object_class)
             if gen is not None:

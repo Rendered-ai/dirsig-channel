@@ -1,0 +1,126 @@
+schemas:
+  Countryside:
+    alias: Countryside
+    tooltip: European countryside scene with configurable biome regions, power infrastructure, and trees. Elevation ranges from 250-400 meters.
+    category: Scenes
+    subcategory: Backgrounds
+    help: dirsig_pkg/scenes/CableScene.md
+    thumbnail: dirsig_pkg/scenes/CablesScene.png
+    color: '#3A4928'
+    inputs:
+    - name: Objects
+      description: Objects to place in the scene
+      default: null
+      link: true
+    - name: Use Trees
+      description: Add trees to the scene
+      default: "True"
+      select:
+      - "True"
+      - "False"
+    - name: Tower Type
+      description: Type of power transmission tower to use
+      default: "Tower 1"
+      select:
+      - "<random>"
+      - "Tower 1"
+      - "Tower 2"
+      - "Tower 3"
+      - "Tower 4"
+      - "Tower 5"
+    - name: Cable Type
+      description: Material type for power transmission cables
+      default: "Aluminum"
+      select:
+      - "<random>"
+      - "Aluminum"
+      - "Copper"
+    - name: Include Infrastructure in Annotations
+      description: Include towers and cables in truth mask annotations
+      default: "True"
+      select:
+      - "True"
+      - "False"
+    - name: Central Region
+      description: Biome for the central region. Defaults to Desert if unlinked. If multiple are linked, one is chosen randomly.
+      default: null
+      link: true
+      validation:
+        numLinks: zeroOrMany
+    - name: Northern Region
+      description: Biome for the northern region. Defaults to Desert if unlinked. If multiple are linked, one is chosen randomly.
+      default: null
+      link: true
+      validation:
+        numLinks: zeroOrMany
+    - name: Eastern Region
+      description: Biome for the eastern region. Defaults to Desert if unlinked. If multiple are linked, one is chosen randomly.
+      default: null
+      link: true
+      validation:
+        numLinks: zeroOrMany
+    - name: Southern Region
+      description: Biome for the southern region. Defaults to Desert if unlinked. If multiple are linked, one is chosen randomly.
+      default: null
+      link: true
+      validation:
+        numLinks: zeroOrMany
+    - name: Western Region
+      description: Biome for the western region. Defaults to Desert if unlinked. If multiple are linked, one is chosen randomly.
+      default: null
+      link: true
+      validation:
+        numLinks: zeroOrMany
+    outputs:
+    - name: Scene
+
+  GrassBiome:
+    alias: Grass Biome
+    tooltip: A lush grass biome.
+    category: Scenes
+    subcategory: Backgrounds
+    color: '#3A4928'
+    inputs:
+    - name: Density
+      description: Grass density and distribution pattern
+      default: "Lush & Thick"
+      select:
+      - "<random>"
+      - "Lush & Thick"
+      - "Thin & Clumpy"
+    outputs:
+    - name: Biome
+      description: The grass biome definition.
+
+  WheatBiome:
+    alias: Wheat Biome
+    tooltip: A golden wheat biome.
+    category: Scenes
+    subcategory: Backgrounds
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - name: Biome
+      description: The wheat biome definition.
+
+  CornBiome:
+    alias: Corn Biome
+    tooltip: A tall corn biome.
+    category: Scenes
+    subcategory: Backgrounds
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - name: Biome
+      description: The corn biome definition.
+
+  DesertBiome:
+    alias: Desert Biome
+    tooltip: A desert biome with sparse vegetation like Euclea racemosa and Restio eleocharis.
+    category: Scenes
+    subcategory: Backgrounds
+    color: '#3A4928'
+    inputs: []
+    outputs:
+    - name: Biome
+      description: The desert biome definition.

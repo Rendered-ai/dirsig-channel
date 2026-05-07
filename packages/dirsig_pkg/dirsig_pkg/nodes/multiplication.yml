@@ -1,0 +1,19 @@
+schemas:
+  Multiplication:
+    alias: Multiplication
+    tooltip: Multiplies two numbers together. Inputs can be strings, numbers, or links from other nodes.
+    category: Common
+    subcategory: Values
+    color: '#B3B3B3'
+    inputs:
+    - name: Input A
+      description: First number to multiply (can be string, number, or link)
+      default: 1
+      link: true
+    - name: Input B
+      description: Second number to multiply (can be string, number, or link)
+      default: 1
+      link: true
+    outputs:
+    - name: Product
+      description: The result of multiplying Input A and Input B

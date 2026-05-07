@@ -178,6 +178,11 @@ schemas:
     help: dirsig_pkg/platforms/CustomRGBSensor.md
     color: "#D4BF88"
     inputs:
+    - name: Truth Bands
+      default: "GeoLocation,Intersection"
+      description: Comma-separated list of truth bands to collect (e.g., GeoLocation,Intersection,Material,Shadow,Temperature)
+      validation:
+        type: string
     - name: Pixels
       default: "[320,240]"
       description: Number of pixels in x-dim and y-dim
@@ -210,6 +215,23 @@ schemas:
           - type: float
             minimum: 0.00001
           - numLinks: one
+    - name: Mount Orientation
+      default: "Down"
+      description: Sensor mount orientation. Downward or forward-looking.
+      select:
+      - "Down"
+      - "Forward"
+      validation:
+        type: string
+    - name: Detector Clock Rate (Hz)
+      default: "60.0"
+      description: Frame rate of the detector in Hz
+      validation:
+        type: float
+        minimum: 0.0001
+    - name: File Schedule
+      default: simulation
+      select: [simulation, capture, task]
     - name: Flex Motion
       validation:
         numLinks: one
@@ -268,6 +290,14 @@ schemas:
       validation:
         float:
             minimum: 0.0
+    - name: Mount Orientation
+      default: "Down"
+      description: Sensor mount orientation. Downward or forward-looking.
+      select:
+      - "Down"
+      - "Forward"
+      validation:
+        type: string
     - name: Flex Motion
       validation:
         numLinks: one
@@ -286,6 +316,112 @@ schemas:
       select: [T, F]
       validation:
         type: string
+    - name: Detector Clock Rate (Hz)
+      default: "30.0"
+      validation:
+        type: float
+    - name: File Schedule
+      default: simulation
+      select: [simulation, capture, task]
+    outputs:
+    - name: Sensor
+
+  ElectroOptical:
+    alias: Electro-optical
+    category: Platforms
+    subcategory: Sensors
+    tooltip: Electro-optical PAN-only sensor derived from Altum-PT.
+    help: dirsig_pkg/platforms/ElectroOptical.md
+    color: '#D4BF88'
+    inputs:
+    - name: Resolution
+      default: "[2064, 1544]"
+      description: Number of pixels in x-dim and y-dim
+      validation:
+        array:
+          items:
+            type: integer
+            minimum: 1
+          minItems: 2
+          maxItems: 2
+    - name: Override Focal Length (mm)
+      default: "0.0"
+      description: Override focal length (mm). Use 0.0 for default (8.2 mm).
+      validation:
+        type: float
+        minimum: 0.0
+    - name: Mount Orientation
+      default: "Down"
+      description: Sensor mount orientation. Downward or forward-looking.
+      select:
+      - "Down"
+      - "Forward"
+      validation:
+        type: string
+    - name: Collect Truth
+      default: "True"
+      description: Enable truth mask collection (Intersection).
+      select:
+      - "True"
+      - "False"
+    - name: Flex Motion
+      validation:
+        numLinks: one
+    - name: Detector Clock Rate (Hz)
+      default: "30.0"
+      validation:
+        type: float
+    - name: File Schedule
+      default: simulation
+      select: [simulation, capture, task]
+    outputs:
+    - name: Sensor
+  
+  AltumPT:
+    alias: Altum-PT
+    category: Platforms
+    subcategory: Sensors
+    tooltip: Altum-PT 6-band MSI+PAN. MicaSense Camera for 5.28 cm MSI; 2.49 cm Pan GSD at 120 m.
+    help: dirsig_pkg/platforms/AltumPT.md
+    color: '#D4BF88'
+    inputs:
+    - name: Resolution
+      default: "[2064, 1544]"
+      description: Number of pixels in x-dim and y-dim
+      validation:
+        array:
+          items:
+            type: integer
+            minimum: 1
+          minItems: 2
+          maxItems: 2
+    - name: RGB Only
+      default: "False"
+      select:
+      - "True"
+      - "False"
+    - name: Add PAN
+      default: "False"
+      select:
+      - "True"
+      - "False"
+    - name: Override Focal Length (mm)
+      default: "0.0"
+      description: Override focal length for MSI bands (mm). PAN will be double this value. Use 0.0 for defaults (8.0 mm MSI, 16.4 mm PAN).
+      validation:
+        type: float
+        minimum: 0.0
+    - name: Mount Orientation
+      default: "Down"
+      description: Sensor mount orientation. Downward or forward-looking.
+      select:
+      - "Down"
+      - "Forward"
+      validation:
+        type: string
+    - name: Flex Motion
+      validation:
+        numLinks: one
     - name: Detector Clock Rate (Hz)
       default: "30.0"
       validation:
