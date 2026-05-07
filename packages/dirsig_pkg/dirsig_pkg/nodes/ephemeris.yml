@@ -21,6 +21,7 @@ schemas:
     tooltip: Directly supply static positions of the Sun and Moon.
     category: Simulators
     subcategory: Ephemeris
+    help: dirsig_pkg/simulators/fixed_ephemeris.md
     color: "#F76902"
     inputs: 
     - name: Solar Zenith

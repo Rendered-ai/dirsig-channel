@@ -2,6 +2,7 @@ schemas:
   Datetime:
     category: Common
     subcategory: Values
+    help: dirsig_pkg/common/datetime.md
     color: "#B3B3B3"
     inputs:
     - name: Year

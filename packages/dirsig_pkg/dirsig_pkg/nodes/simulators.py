@@ -106,13 +106,17 @@ class Simulate(Node):
         dirsig.add_plugin(platformObject)
 
         ephemerisPlugin = self.inputs["Ephemeris"][0]
-        if isinstance(ephemerisPlugin, EphemerisPlugin):
-            dirsig.add_plugin(ephemerisPlugin)
 
+        # Register atmosphere first so that BasicAtmosphere's internal SpiceEphemeris
+        # is installed before any FixedEphemeris plugin. FixedEphemeris must come last
+        # in the JSIM plugin list so DIRSIG sets it up after SpiceEphemeris and it wins.
         atm = atmos.BasicAtmospherePlugin()
         atm.set_radiative_transfer(atmos.SimpleRadiativeTransfer(250))
         atm.set_weather(Path("$DIRSIG_HOME/lib/data/weather/jun2392.wth"))
         dirsig.add_plugin(atm)
+
+        if isinstance(ephemerisPlugin, EphemerisPlugin):
+            dirsig.add_plugin(ephemerisPlugin)
 
         # Collect scene metadata for the dataset annotations
         sceneMetadata = sceneBundle['metadata']

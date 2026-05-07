@@ -21,6 +21,7 @@ schemas:
     tooltip: Simulate dirsig tasks and create associated truth and metadata
     category: Simulators
     subcategory: DIRSIG
+    help: dirsig_pkg/simulators/simulate.md
     color: "#F76902" # https://www.rit.edu/brandportal/colors
     inputs:
     - description: DIRSIG Scene
